@@ -1,6 +1,6 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
-var googleapis = require('googleapis');
+const googleapis = require('googleapis');
 
 var climateMessage = "This is the monthly climate coach report, here to give you an \
   overview of various metrics in this repository, such as responsiveness and tone used in discussions"; 
@@ -15,7 +15,7 @@ function run() {
   //const repoName = core.getInput('repo-name');
   //const repoOwner = core.getInput('repo-owner');
   
-  console.log("I am running indeX"); 
+  console.log("I am running index"); 
   const context = github.context;    
   const newIssue = client.issues.create({
       ...context.repo,
@@ -34,7 +34,7 @@ function run() {
       console.log(JSON.stringify(response, null, 2));
     });
   });
-  
+
 }
 
 
