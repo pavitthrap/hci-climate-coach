@@ -1,0 +1,15 @@
+name: 'Climate Coach'
+description: 'Measure the climate of PR/issues in the last 1 month.'
+inputs:
+    repo-token:
+      description: 'Token for the repository. Can be passed in using {{ secrets.GITHUB_TOKEN }}.'
+      required: true
+    repo-name:
+        description: 'Name of this repository.'
+        required: true
+    repo-owner:
+        description: 'Owner of this repository.'
+        required: true
+runs:
+  using: 'node12'
+  main: 'index.js'
