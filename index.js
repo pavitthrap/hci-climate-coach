@@ -15,6 +15,7 @@ function run() {
   //const repoName = core.getInput('repo-name');
   //const repoOwner = core.getInput('repo-owner');
   
+  console.log("I am running indeX"); 
   const context = github.context;    
   const newIssue = client.issues.create({
       ...context.repo,
