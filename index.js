@@ -27,7 +27,8 @@ function analyzeToxicity(commentAnalyzer, text) {
   commentAnalyzer.comments.analyze({key: API_KEY, resource: analyzeRequest}, (err, response) => {
     if (err) throw err;
     var analysis = JSON.stringify(response, null, 2);
-    var toxicity = analysis.data.attributeScores.TOXICITY.summaryScore.value;
+    console.log("ANALYSIS: ", analysis)
+    // var toxicity = analysis.data.attributeScores.TOXICITY.summaryScore.value;
     console.log("toxicity is: ", toxicity);
     return toxicity;
   });
@@ -96,7 +97,7 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScores)
           // console.log("ISSUE: ", issue);
           var issueUser = issue.user.login;
           var issueText = issue.body; 
-          var issueId = issue.id; 
+          var issueId = issue.number; 
           // TODO - measure toxicity of the PR/Issue main message as well 
 
           // measure toxicity here 
