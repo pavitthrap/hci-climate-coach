@@ -117,7 +117,7 @@ function run() {
   // });
 
   var commentAnalyzer = google.commentanalyzer('v1alpha1');
-  var toxicityScores = yield getToxicityScores(client, owner, repo, commentAnalyzer)
+  var toxicityScores = yield getToxicityScores(client, owner, repo, commentAnalyzer);
   console.log("value of map final: ", toxicityScores);
   
   // var analyzeRequest = {
