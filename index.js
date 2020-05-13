@@ -29,9 +29,10 @@ function analyzeToxicity(commentAnalyzer, text) {
     var analysis = JSON.stringify(response, null, 2);
     var toxicity = analysis.data.attributeScores.TOXICITY.summaryScore.value;
     console.log("toxicity is: ", toxicity);
+    return toxicity;
   });
   
-  return toxicity;
+  return; 
 }
 
 // TODO - pass in issue text as well 
