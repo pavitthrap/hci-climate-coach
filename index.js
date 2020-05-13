@@ -63,13 +63,13 @@ function getToxicityScores(client, owner, repo, commentAnalyzer) {
           owner: owner,
           repo: repo,
           since: '2020-04-12T20:12:47Z'
-      })
+      });
       // .then(res => {
       //   console.log(res);
       // })
       // .catch(err => {
       //     console.log(err);
-      // });;
+      // });
 
       if (status !== 200) {
           throw new Error(`Received unexpected API status code ${status}`);
