@@ -34,23 +34,27 @@ function analyzeToxicity(commentAnalyzer, text) {
 function updateCommentToxicityScore(client, owner, repo, issueID, toxicityScores, commentAnalyzer) {
   return __awaiter(this, void 0, void 0, function* () {
     console.log('getting comments...\n');
-    const {data: comments} = yield client.issues.listComments({
-        owner: owner,
-        repo: repo,
-        issue_number: issueID,
-    });
+    try {
+      const {data: comments} = yield client.issues.listComments({
+          owner: owner,
+          repo: repo,
+          issue_number: issueID,
+      });
+      console.log('in function numComments: ' + comments.length);
+      for (var comment in comments) {
+      //   if (! toxicityScores.has(user)) {
+      //     toxicityScores.set(user, new Map()); 
+      //   }
+        console.log("COMMENT:", comment);
+      }
 
-    for (var comment in comments) {
-    //   if (! toxicityScores.has(user)) {
-    //     toxicityScores.set(user, new Map()); 
-    //   }
-      console.log("COMMENT:", comment);
+      toxicityScores.set("A", "pavi");
+      console.log("value of map now in update: ", toxicityScores);
+      return comments.length;
     }
-
-    console.log('in function numComments: ' + comments.length);
-    toxicityScores.set("A", "pavi");
-    console.log("value of map now in update: ", toxicityScores);
-    return comments.length;
+    catch(err) {
+      console.log("error thrown: ", err); 
+    }
   });
 }
 
