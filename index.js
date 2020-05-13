@@ -54,11 +54,11 @@ function updateCommentToxicityScore(client, owner, repo, issueID, toxicityScores
   });
 }
 
-function getToxicityScores(client, owner, repo, commentAnalyzer) {
+function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScores) {
   return __awaiter(this, void 0, void 0, function* () {
       // Provide console output if we loop for a while.
       console.log('Checking...');
-      var toxicityScores = new Map(); 
+      
       const { status, data: issues } = yield client.issues.listForRepo({
           owner: owner,
           repo: repo,
@@ -101,35 +101,38 @@ function getToxicityScores(client, owner, repo, commentAnalyzer) {
 
 
 function run() {
-  const {google} = require("googleapis");
+  return __awaiter(this, void 0, void 0, function* () {
+    const {google} = require("googleapis");
 
-  var client = new github.GitHub(core.getInput('repo-token', { required: true }));
-  const API_KEY = core.getInput('google-api-key');
-  const repo = core.getInput('repo-name');
-  const owner = core.getInput('repo-owner');
-  
-  console.log("I am running index"); 
-  // const context = github.context;    
-  // const newIssue = client.issues.create({
-  //     ...context.repo,
-  //     title: 'Climate Coach for Current Month',
-  //     body: climateMessage
-  // });
+    var client = new github.GitHub(core.getInput('repo-token', { required: true }));
+    const API_KEY = core.getInput('google-api-key');
+    const repo = core.getInput('repo-name');
+    const owner = core.getInput('repo-owner');
+    
+    console.log("I am running index"); 
+    // const context = github.context;    
+    // const newIssue = client.issues.create({
+    //     ...context.repo,
+    //     title: 'Climate Coach for Current Month',
+    //     body: climateMessage
+    // });
 
-  var commentAnalyzer = google.commentanalyzer('v1alpha1');
-  var toxicityScores = yield getToxicityScores(client, owner, repo, commentAnalyzer);
-  console.log("value of map final: ", toxicityScores);
-  
-  // var analyzeRequest = {
-  //   comment: {text: 'what kind of idiot name is foo?'},
-  //   requestedAttributes: {'TOXICITY': {}}
-  // };
+    var commentAnalyzer = google.commentanalyzer('v1alpha1');
+    var toxicityScores = new Map(); 
+    yield getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScores);
+    console.log("value of map final: ", toxicityScores);
+    
+    // var analyzeRequest = {
+    //   comment: {text: 'what kind of idiot name is foo?'},
+    //   requestedAttributes: {'TOXICITY': {}}
+    // };
 
-  // commentAnalyzer.comments.analyze({key: API_KEY, resource: analyzeRequest}, (err, response) => {
-  //   if (err) throw err;
-  //   console.log(JSON.stringify(response, null, 2));
-  // });
+    // commentAnalyzer.comments.analyze({key: API_KEY, resource: analyzeRequest}, (err, response) => {
+    //   if (err) throw err;
+    //   console.log(JSON.stringify(response, null, 2));
+    // });
 
+  }); 
 
 }
 
