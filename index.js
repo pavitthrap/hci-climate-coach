@@ -18,7 +18,8 @@ var climateMessage = "This is the monthly climate coach report, here to give you
 var DISCOVERY_URL = 'https://commentanalyzer.googleapis.com/$discovery/rest?version=v1alpha1'
 
 function analyzeToxicity(commentAnalyzer, text) {
-   var analyzeRequest = {
+  const API_KEY = core.getInput('google-api-key');
+  var analyzeRequest = {
     comment: {text: text},
     requestedAttributes: {'TOXICITY': {}}
   };
@@ -117,7 +118,7 @@ function run() {
     const {google} = require("googleapis");
 
     var client = new github.GitHub(core.getInput('repo-token', { required: true }));
-    const API_KEY = core.getInput('google-api-key');
+   
     const repo = core.getInput('repo-name');
     const owner = core.getInput('repo-owner');
     
