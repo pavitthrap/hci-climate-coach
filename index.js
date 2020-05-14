@@ -18,29 +18,30 @@ var climateMessage = "This is the monthly climate coach report, here to give you
 var DISCOVERY_URL = 'https://commentanalyzer.googleapis.com/$discovery/rest?version=v1alpha1'
 
 function analyzeToxicity(commentAnalyzer, text) {
-  const API_KEY = core.getInput('google-api-key');
-  var analyzeRequest = {
-    comment: {text: text},
-    requestedAttributes: {'TOXICITY': {}}
-  };
+  return __awaiter(this, void 0, void 0, function* () {
+    const API_KEY = core.getInput('google-api-key');
+    var analyzeRequest = {
+      comment: {text: text},
+      requestedAttributes: {'TOXICITY': {}}
+    };
 
-  commentAnalyzer.comments.analyze({key: API_KEY, resource: analyzeRequest}, (err, response) => {
-    if (err) throw err;
-    var analysis = JSON.stringify(response, null, 2);
-    console.log("ANALYSIS: ", analysis)
-    // var toxicity = analysis.data.attributeScores.TOXICITY.summaryScore.value;
-    console.log("toxicity is: ", toxicity);
-    return toxicity;
+    commentAnalyzer.comments.analyze({key: API_KEY, resource: analyzeRequest}, (err, response) => {
+      if (err) throw err;
+      var analysis = JSON.stringify(response, null, 2);
+      console.log("ANALYSIS.DATA : ", analysis.data)
+      // var toxicity = analysis.data.attributeScores.TOXICITY.summaryScore.value;
+      // console.log("toxicity is: ", toxicity);
+      return toxicity;
+    });
+    return; 
   });
-  
-  return; 
 }
 
 // TODO - pass in issue text as well 
 function updateCommentToxicityScore(client, owner, repo, issueUser, issueID, issueText, toxicityScores, commentAnalyzer) {
   return __awaiter(this, void 0, void 0, function* () {
     console.log("analyzing main text... ");
-    var toxicity = analyzeToxicity(commentAnalyzer, issueText);
+    var toxicity = yield analyzeToxicity(commentAnalyzer, issueText);
     if (! toxicityScores.has(issueUser)) {
         toxicityScores.set(issueUser, new Map()); 
     }
@@ -59,14 +60,13 @@ function updateCommentToxicityScore(client, owner, repo, issueUser, issueID, iss
 
       console.log('in function numComments: ' + comments.length);
       for (var comment in comments) {
+        var toxicity = yield analyzeToxicity(commentAnalyzer, issueText);
       //   if (! toxicityScores.has(user)) {
       //     toxicityScores.set(user, new Map()); 
       //   }
         console.log("COMMENT:", comment);
       }
 
-      toxicityScores.set("A", "pavi");
-      console.log("value of map now in update: ", toxicityScores);
       return comments.length;
     }
     catch(err) {
@@ -98,14 +98,13 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScores)
           var issueUser = issue.user.login;
           var issueText = issue.body; 
           var issueId = issue.number; 
+          console.log("ISSUE NUMBER: ", issueId );
           // TODO - measure toxicity of the PR/Issue main message as well 
 
           // measure toxicity here 
           yield updateCommentToxicityScore(client, owner, repo, issueUser, issueId, issueText, toxicityScores, commentAnalyzer);
           
           //TODO - remove 
-          toxicityScores.set("B", "yo");
-          console.log("value of map now in get: ", toxicityScores);
           return toxicityScores; 
       }
       console.log("value of map now: ", toxicityScores);
@@ -131,6 +130,8 @@ function run() {
     yield getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScores);
     console.log("value of map final: ", toxicityScores);
     
+    // TODO - maybe apply some filtering to the toxicity scores?
+
      // const context = github.context;    
     // const newIssue = client.issues.create({
     //     ...context.repo,
