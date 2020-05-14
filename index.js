@@ -24,12 +24,15 @@ function analyzeToxicity(commentAnalyzer, text) {
       requestedAttributes: {'TOXICITY': {}}
     };
 
+    var toxicity;
     commentAnalyzer.comments.analyze({key: API_KEY, resource: analyzeRequest}, (err, response) => {
       if (err) throw err;
-      var toxicity = response.data.attributeScores.TOXICITY.summaryScore.value;
-
+      toxicity = response.data.attributeScores.TOXICITY.summaryScore.value;
+      console.log("first return in analyze");
       return toxicity;
     });
+
+    console.log("last return, toxicity is: ", toxicity);
     return; 
   });
 }
