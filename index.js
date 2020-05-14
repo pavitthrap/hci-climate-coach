@@ -27,7 +27,7 @@ function analyzeToxicity(commentAnalyzer, text) {
     commentAnalyzer.comments.analyze({key: API_KEY, resource: analyzeRequest}, (err, response) => {
       if (err) throw err;
       var analysis = JSON.stringify(response, null, 2);
-      console.log("ANALYSIS.DATA : ", analysis.data)
+      console.log("ANALYSIS.data : ", response.data)
       // var toxicity = analysis.data.attributeScores.TOXICITY.summaryScore.value;
       // console.log("toxicity is: ", toxicity);
       
@@ -41,14 +41,13 @@ function analyzeToxicity(commentAnalyzer, text) {
 // TODO - pass in issue text as well 
 function updateCommentToxicityScore(client, owner, repo, issueUser, issueID, issueText, toxicityScores, commentAnalyzer) {
   return __awaiter(this, void 0, void 0, function* () {
-    console.log("analyzing main text... ");
+    console.log("analyzing issue text... ");
     var toxicity = yield analyzeToxicity(commentAnalyzer, issueText);
     if (! toxicityScores.has(issueUser)) {
         toxicityScores.set(issueUser, new Map()); 
     }
     var userToxicityMap = toxicityScores.get(issueUser);
     userToxicityMap.set(issueID, toxicity);
-    console.log("after issue analysis, toxicityMap is: ", toxicityScores);
 
     console.log('getting comments...\n');
 
@@ -59,7 +58,7 @@ function updateCommentToxicityScore(client, owner, repo, issueUser, issueID, iss
           issue_number: issueID,
       });
 
-      console.log('in function numComments: ' + comments.length);
+      console.log('in function numComments: ' + comments);
       for (var comment in comments) {
         var toxicity = yield analyzeToxicity(commentAnalyzer, issueText);
       //   if (! toxicityScores.has(user)) {
@@ -99,7 +98,7 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScores)
           var issueUser = issue.user.login;
           var issueText = issue.body; 
           var issueId = issue.number; 
-          console.log("ISSUE NUMBER: ", issueId );
+          console.log("ISSUE ID: ", issue.id );
           // TODO - measure toxicity of the PR/Issue main message as well 
 
           // measure toxicity here 
