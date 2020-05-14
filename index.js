@@ -26,28 +26,28 @@ function analyzeToxicity(commentAnalyzer, text) {
 
     commentAnalyzer.comments.analyze({key: API_KEY, resource: analyzeRequest}, (err, response) => {
       if (err) throw err;
-      var analysis = JSON.stringify(response, null, 2);
-      console.log("ANALYSIS score : ", response.data.attributeScores.TOXICITY.summaryScore.value)
-      // var toxicity = analysis.data.attributeScores.TOXICITY.summaryScore.value;
-      // console.log("toxicity is: ", toxicity);
-      
-      // TODO - switch to analysis
-      return toxicityThreshold;
+      var toxicity = response.data.attributeScores.TOXICITY.summaryScore.value;
+
+      return toxicity;
     });
     return; 
   });
 }
 
+function updateToxicityInMap(toxicity, user, issueID, toxicityScores) {
+  if (! toxicityScores.has(user)) {
+    toxicityScores.set(user, new Map()); 
+  }
+  var userToxicityMap = toxicityScores.get(user);
+  userToxicityMap.set(issueID, toxicity);
+}
+
 // TODO - pass in issue text as well 
-function updateCommentToxicityScore(client, owner, repo, issueUser, issueID, issueText, toxicityScores, commentAnalyzer) {
+function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issueText, toxicityScores, commentAnalyzer) {
   return __awaiter(this, void 0, void 0, function* () {
     console.log("analyzing issue text... ");
     var toxicity = yield analyzeToxicity(commentAnalyzer, issueText);
-    if (! toxicityScores.has(issueUser)) {
-        toxicityScores.set(issueUser, new Map()); 
-    }
-    var userToxicityMap = toxicityScores.get(issueUser);
-    userToxicityMap.set(issueID, toxicity);
+    updateToxicityInMap(toxicity, issueUser, issueID, toxicityScores)
 
     console.log('getting comments...\n');
     try {
@@ -58,12 +58,12 @@ function updateCommentToxicityScore(client, owner, repo, issueUser, issueID, iss
       });
 
       console.log('in function numComments: ', comments);
-      for (var comment in comments) {
-        var toxicity = yield analyzeToxicity(commentAnalyzer, issueText);
-      //   if (! toxicityScores.has(user)) {
-      //     toxicityScores.set(user, new Map()); 
-      //   }
-        console.log("COMMENT:", comment);
+      for (var comment of comments) {
+        var toxicity = yield analyzeToxicity(commentAnalyzer, comment.body);
+        var user = comment.user.login;
+        updateToxicityInMap(toxicity, user, comment.id, toxicityScores)
+
+        console.log("comment Toxicity: ", toxicity);
       }
 
       return comments.length;
@@ -93,20 +93,16 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScores)
           return toxicityScores; 
       }
       for ( var issue of issues) {
-          // console.log("ISSUE: ", issue);
           var issueUser = issue.user.login;
           var issueText = issue.body; 
           var issueId = issue.number; 
-          console.log("ISSUE ID: ", issue.id );
-          // TODO - measure toxicity of the PR/Issue main message as well 
 
           // measure toxicity here 
-          yield updateCommentToxicityScore(client, owner, repo, issueUser, issueId, issueText, toxicityScores, commentAnalyzer);
+          yield getToxicityScoresForIssue(client, owner, repo, issueUser, issueId, issueText, toxicityScores, commentAnalyzer);
           
           //TODO - remove 
           return toxicityScores; 
       }
-      console.log("value of map now: ", toxicityScores);
       return toxicityScores; 
       
   });
@@ -123,7 +119,6 @@ function run() {
     const owner = core.getInput('repo-owner');
     
     var commentAnalyzer = google.commentanalyzer('v1alpha1');
-    analyzeToxicity(commentAnalyzer, "You are an idiot person.");
 
     var toxicityScores = new Map(); 
     yield getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScores);
