@@ -24,14 +24,19 @@ function analyzeToxicity(commentAnalyzer, text) {
       requestedAttributes: {'TOXICITY': {}}
     };
 
-    var getToxicity = function() {commentAnalyzer.comments.analyze({key: API_KEY, resource: analyzeRequest}, (err, response) => {
+    var promise = commentAnalyzer.comments.analyze({key: API_KEY, resource: analyzeRequest}, (err, response) => {
       if (err) throw err;
       toxicity = response.data.attributeScores.TOXICITY.summaryScore.value;
       console.log("first return in analyze");
       return toxicity;
-    }) };
+    });
 
-    var toxicity = await getToxicity();
+    var toxicity;
+    promise.then((value) => {
+      console.log(value);
+      toxicity = value; 
+    });
+
     console.log("last return, toxicity is: ", toxicity);
     return; 
   });
