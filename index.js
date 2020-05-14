@@ -48,6 +48,7 @@ function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issu
     console.log("analyzing issue text... ");
     var toxicity = yield analyzeToxicity(commentAnalyzer, issueText);
     updateToxicityInMap(toxicity, issueUser, issueID, toxicityScores)
+    console.log("toxicityScore after putting issue in: ", toxicityScores);
 
     console.log('getting comments...\n');
     try {
@@ -57,13 +58,15 @@ function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issu
           issue_number: issueID,
       });
 
-      console.log('in function numComments: ', comments);
+      // console.log('in function numComments: ', comments);
       for (var comment of comments) {
+        
         var toxicity = yield analyzeToxicity(commentAnalyzer, comment.body);
         var user = comment.user.login;
         updateToxicityInMap(toxicity, user, comment.id, toxicityScores)
-
+        console.log("COMMENT TEXT: ", comment.body, " , user: ", user);
         console.log("comment Toxicity: ", toxicity);
+        console.log("toxicityScore after putting comment in: ", toxicityScores);
       }
 
       return comments.length;
