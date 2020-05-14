@@ -14,8 +14,7 @@ const github = require("@actions/github");
 var climateMessage = "This is the monthly climate coach report, here to give you an \
   overview of various metrics in this repository, such as responsiveness and tone used in discussions"; 
 
-
-var DISCOVERY_URL = 'https://commentanalyzer.googleapis.com/$discovery/rest?version=v1alpha1'
+var toxicityThreshold = 0.5; 
 
 function analyzeToxicity(commentAnalyzer, text) {
   return __awaiter(this, void 0, void 0, function* () {
@@ -31,7 +30,9 @@ function analyzeToxicity(commentAnalyzer, text) {
       console.log("ANALYSIS.DATA : ", analysis.data)
       // var toxicity = analysis.data.attributeScores.TOXICITY.summaryScore.value;
       // console.log("toxicity is: ", toxicity);
-      return toxicity;
+      
+      // TODO - switch to analysis
+      return toxicityThreshold;
     });
     return; 
   });
