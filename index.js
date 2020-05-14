@@ -27,7 +27,7 @@ function analyzeToxicity(commentAnalyzer, text) {
     commentAnalyzer.comments.analyze({key: API_KEY, resource: analyzeRequest}, (err, response) => {
       if (err) throw err;
       var analysis = JSON.stringify(response, null, 2);
-      console.log("ANALYSIS.data : ", response.data)
+      console.log("ANALYSIS score : ", response.data.attributeScores.TOXICITY.summaryScore.value)
       // var toxicity = analysis.data.attributeScores.TOXICITY.summaryScore.value;
       // console.log("toxicity is: ", toxicity);
       
@@ -50,7 +50,6 @@ function updateCommentToxicityScore(client, owner, repo, issueUser, issueID, iss
     userToxicityMap.set(issueID, toxicity);
 
     console.log('getting comments...\n');
-
     try {
       const {data: comments} = yield client.issues.listComments({
           owner: owner,
@@ -58,7 +57,7 @@ function updateCommentToxicityScore(client, owner, repo, issueUser, issueID, iss
           issue_number: issueID,
       });
 
-      console.log('in function numComments: ' + comments);
+      console.log('in function numComments: ', comments);
       for (var comment in comments) {
         var toxicity = yield analyzeToxicity(commentAnalyzer, issueText);
       //   if (! toxicityScores.has(user)) {
