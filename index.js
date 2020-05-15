@@ -24,21 +24,19 @@ function analyzeToxicity(commentAnalyzer, text) {
       requestedAttributes: {'TOXICITY': {}}
     };
 
-    var promise = commentAnalyzer.comments.analyze({key: API_KEY, resource: analyzeRequest}, (err, response) => {
-      if (err) throw err;
-      toxicity = response.data.attributeScores.TOXICITY.summaryScore.value;
-      console.log("first return in analyze");
-      return toxicity;
-    });
-
-    var toxicity;
-    promise.then((value) => {
-      console.log(value);
-      toxicity = value; 
-    });
+    var toxicity = commentAnalyzer.comments.analyze({key: API_KEY, resource: analyzeRequest})
+      .then(response => {
+        toxicity = response.data.attributeScores.TOXICITY.summaryScore.value;
+        console.log("first return in analyze, ", toxicity);
+        return toxicity;
+      })
+      .catch(err => {
+        console.log(err);
+        throw err;
+      });
 
     console.log("last return, toxicity is: ", toxicity);
-    return; 
+    return toxicity; 
   });
 }
 
