@@ -27,7 +27,6 @@ function analyzeToxicity(commentAnalyzer, text) {
     var toxicity = yield commentAnalyzer.comments.analyze({key: API_KEY, resource: analyzeRequest})
       .then(response => {
         toxicity = response.data.attributeScores.TOXICITY.summaryScore.value;
-        console.log("first return in analyze, ", toxicity);
         return toxicity;
       })
       .catch(err => {
@@ -35,7 +34,6 @@ function analyzeToxicity(commentAnalyzer, text) {
         throw err;
       });
 
-    console.log("last return, toxicity is: ", toxicity);
     return toxicity; 
   });
 }
@@ -48,13 +46,11 @@ function updateToxicityInMap(toxicity, user, issueID, toxicityScores) {
   userToxicityMap.set(issueID, toxicity);
 }
 
-// TODO - pass in issue text as well 
 function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issueText, toxicityScores, commentAnalyzer) {
   return __awaiter(this, void 0, void 0, function* () {
     console.log("analyzing issue text... ");
     var toxicity = yield analyzeToxicity(commentAnalyzer, issueText);
     updateToxicityInMap(toxicity, issueUser, issueID, toxicityScores)
-    console.log("toxicityScore after putting issue in: ", toxicityScores);
 
     console.log('getting comments...\n');
     try {
@@ -63,36 +59,35 @@ function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issu
           repo: repo,
           issue_number: issueID,
       });
-
-      // console.log('in function numComments: ', comments);
-      for (var comment of comments) {
-        
-        var toxicity = yield analyzeToxicity(commentAnalyzer, comment.body);
-        var user = comment.user.login;
-        updateToxicityInMap(toxicity, user, comment.id, toxicityScores)
-        console.log("COMMENT TEXT: ", comment.body, " , user: ", user);
-        console.log("comment Toxicity: ", toxicity);
-        console.log("toxicityScore after putting comment in: ", toxicityScores);
-      }
-
-      return comments.length;
+    } catch(err) {
+      console.log("error thrown: ", err);
+      return;  
     }
-    catch(err) {
-      console.log("error thrown: ", err); 
+
+    for (var comment of comments) {
+      var toxicity = yield analyzeToxicity(commentAnalyzer, comment.body);
+      var user = comment.user.login;
+      updateToxicityInMap(toxicity, user, comment.id, toxicityScores)
+      console.log("COMMENT TEXT: ", comment.body, " , user: ", user, ", comment Toxicity: ", toxicity);
     }
+
+    return;
   });
 }
 
 function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScores) {
   return __awaiter(this, void 0, void 0, function* () {
-      // Provide console output if we loop for a while.
-      console.log('Checking...');
-      
-      const { status, data: issues } = yield client.issues.listForRepo({
-          owner: owner,
-          repo: repo,
-          since: '2020-04-12T20:12:47Z'
-      });
+
+      try {
+        const { status, data: issues } = yield client.issues.listForRepo({
+            owner: owner,
+            repo: repo,
+            since: '2020-04-12T20:12:47Z'
+        });
+      } catch (err) {
+        console.log("error thrown: ", err); 
+        return; 
+      }
 
       if (status !== 200) {
           throw new Error(`Received unexpected API status code ${status}`);
@@ -101,6 +96,7 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScores)
           console.log("No  issues..")
           return toxicityScores; 
       }
+
       for ( var issue of issues) {
           var issueUser = issue.user.login;
           var issueText = issue.body; 
