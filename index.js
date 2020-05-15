@@ -59,19 +59,20 @@ function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issu
           repo: repo,
           issue_number: issueID,
       });
+    
+      for (var comment of comments) {
+        var toxicity = yield analyzeToxicity(commentAnalyzer, comment.body);
+        var user = comment.user.login;
+        updateToxicityInMap(toxicity, user, comment.id, toxicityScores)
+        console.log("COMMENT TEXT: ", comment.body, " , user: ", user, ", comment Toxicity: ", toxicity);
+      }
+      return;
+
     } catch(err) {
       console.log("error thrown: ", err);
       return;  
     }
 
-    for (var comment of comments) {
-      var toxicity = yield analyzeToxicity(commentAnalyzer, comment.body);
-      var user = comment.user.login;
-      updateToxicityInMap(toxicity, user, comment.id, toxicityScores)
-      console.log("COMMENT TEXT: ", comment.body, " , user: ", user, ", comment Toxicity: ", toxicity);
-    }
-
-    return;
   });
 }
 
@@ -84,31 +85,32 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScores)
             repo: repo,
             since: '2020-04-12T20:12:47Z'
         });
+      
+        if (status !== 200) {
+            throw new Error(`Received unexpected API status code ${status}`);
+        }
+        if (issues.length === 0) {
+            console.log("No  issues..")
+            return toxicityScores; 
+        }
+
+        for ( var issue of issues) {
+            var issueUser = issue.user.login;
+            var issueText = issue.body; 
+            var issueId = issue.number; 
+
+            // measure toxicity here 
+            yield getToxicityScoresForIssue(client, owner, repo, issueUser, issueId, issueText, toxicityScores, commentAnalyzer);
+            
+            //TODO - remove 
+            return toxicityScores; 
+        }
+        return toxicityScores; 
+        
       } catch (err) {
         console.log("error thrown: ", err); 
         return; 
       }
-
-      if (status !== 200) {
-          throw new Error(`Received unexpected API status code ${status}`);
-      }
-      if (issues.length === 0) {
-          console.log("No  issues..")
-          return toxicityScores; 
-      }
-
-      for ( var issue of issues) {
-          var issueUser = issue.user.login;
-          var issueText = issue.body; 
-          var issueId = issue.number; 
-
-          // measure toxicity here 
-          yield getToxicityScoresForIssue(client, owner, repo, issueUser, issueId, issueText, toxicityScores, commentAnalyzer);
-          
-          //TODO - remove 
-          return toxicityScores; 
-      }
-      return toxicityScores; 
       
   });
 }
