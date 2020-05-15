@@ -24,7 +24,7 @@ function analyzeToxicity(commentAnalyzer, text) {
       requestedAttributes: {'TOXICITY': {}}
     };
 
-    var toxicity = commentAnalyzer.comments.analyze({key: API_KEY, resource: analyzeRequest})
+    var toxicity = yield commentAnalyzer.comments.analyze({key: API_KEY, resource: analyzeRequest})
       .then(response => {
         toxicity = response.data.attributeScores.TOXICITY.summaryScore.value;
         console.log("first return in analyze, ", toxicity);
