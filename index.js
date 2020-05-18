@@ -14,7 +14,7 @@ const github = require("@actions/github");
 var climateMessage = "This is the monthly climate coach report, here to give you an \
   overview of various metrics in this repository, such as responsiveness and tone used in discussions"; 
 
-var toxicityThreshold = 0.5; 
+var toxicityThreshold = 0.0; 
 
 // TODO -> create alternate analysis using Sophie's classifier 
 function analyzeToxicity(commentAnalyzer, text) {
@@ -39,20 +39,25 @@ function analyzeToxicity(commentAnalyzer, text) {
   });
 }
 
-function updateToxicityInMap(toxicity, user, issueID, toxicityScores) {
+function updateToxicityInMap(toxicity, user, ID, text, toxicityScores) {
+  if (toxicity < toxicityThreshold) {
+    console.log("Not recording comment/issue since the toxicity score is below the threshold.")
+    return; 
+  }
+  
   if (! toxicityScores.has(user)) {
     toxicityScores.set(user, new Map()); 
   }
   var userToxicityMap = toxicityScores.get(user);
-  userToxicityMap.set(issueID, toxicity);
+  userToxicityMap.set(ID, [toxicity, text]);
 }
 
-function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issueText, toxicityScores, commentAnalyzer) {
+function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issueText, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer) {
   return __awaiter(this, void 0, void 0, function* () {
+    
     console.log("analyzing issue text... ");
-
     var toxicity = yield analyzeToxicity(commentAnalyzer, issueText);
-    updateToxicityInMap(toxicity, issueUser, issueID, toxicityScores)
+    updateToxicityInMap(toxicity, issueUser, issueID, issueText, toxicityScoresIssues)
 
     console.log('getting comments...\n');
     try {
@@ -62,21 +67,11 @@ function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issu
           issue_number: issueID,
       });
     
-      // TODO => pull comment by ID 
       for (var comment of comments) {
         var toxicity = yield analyzeToxicity(commentAnalyzer, comment.body);
         var user = comment.user.login;
-        updateToxicityInMap(toxicity, user, comment.id, toxicityScores)
+        updateToxicityInMap(toxicity, user, comment.id, comment.body, toxicityScoresComments)
         console.log("COMMENT TEXT: ", comment.body, " , user: ", user, ", comment Toxicity: ", toxicity);
-        var comment_id = comment.id
-
-        var getComment = yield client.issues.getComment({
-          owner,
-          repo,
-          comment_id,
-        });
-        console.log("logging obtained comment info: ", getComment);
-
       }
       return;
 
@@ -88,7 +83,7 @@ function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issu
   });
 }
 
-function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScores) {
+function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresIssues, toxicityScoresComments) {
   return __awaiter(this, void 0, void 0, function* () {
 
       try {
@@ -104,7 +99,7 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScores)
         }
         if (issues.length === 0) {
             console.log("No  issues..")
-            return toxicityScores; 
+            return; 
         }
 
         for ( var issue of issues) {
@@ -113,12 +108,13 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScores)
             var issueId = issue.number; 
 
             // measure toxicity here 
-            yield getToxicityScoresForIssue(client, owner, repo, issueUser, issueId, issueText, toxicityScores, commentAnalyzer);
+            yield getToxicityScoresForIssue(client, owner, repo, issueUser, issueId, issueText, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer);
             
             //TODO - remove 
-            return toxicityScores; 
+            return; 
         }
-        return toxicityScores; 
+
+        return; 
         
       } catch (err) {
         console.log("error thrown: ", err); 
@@ -140,9 +136,11 @@ function run() {
     
     var commentAnalyzer = google.commentanalyzer('v1alpha1');
 
-    var toxicityScores = new Map(); 
-    yield getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScores);
-    console.log("value of map final: ", toxicityScores);
+    var toxicityScoresIssues = new Map(); 
+    var toxicityScoresComments = new Map(); 
+    yield getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresIssues, toxicityScoresComments);
+    console.log("value of map issues: ", toxicityScoresIssues);
+    console.log("value of map comments: ", toxicityScoresComments);
     
     // TODO - maybe apply some filtering to the toxicity scores?
     //  - apply threshold 
