@@ -14,9 +14,17 @@ const github = require("@actions/github");
 var climateMessage = "This is the monthly climate coach report, here to give you an \
   overview of various metrics in this repository, such as responsiveness and tone used in discussions"; 
 
-var toxicityThreshold = 0.0; 
+var toxicityThreshold = 0.15; 
+var numOverThreshold = 0; 
+var numUnderThreshold = 0; 
 
 // TODO -> create alternate analysis using Sophie's classifier 
+
+/* Analyzes the toxicity of a comment using Google's Perspective API
+* @param {google API object} A comment analyzer object 
+* @param {string} the text to be analyzed
+* @return {float} The toxicity score of the provided text 
+*/ 
 function analyzeToxicity(commentAnalyzer, text) {
   return __awaiter(this, void 0, void 0, function* () {
     const API_KEY = core.getInput('google-api-key');
@@ -42,9 +50,12 @@ function analyzeToxicity(commentAnalyzer, text) {
 function updateToxicityInMap(toxicity, user, ID, text, toxicityScores) {
   if (toxicity < toxicityThreshold) {
     console.log("Not recording comment/issue since the toxicity score is below the threshold.")
+    numUnderThreshold += 1; 
     return; 
   }
-  
+
+  numOverThreshold += 1; 
+
   if (! toxicityScores.has(user)) {
     toxicityScores.set(user, new Map()); 
   }
@@ -138,14 +149,22 @@ function run() {
 
     var toxicityScoresIssues = new Map(); 
     var toxicityScoresComments = new Map(); 
+
     yield getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresIssues, toxicityScoresComments);
+
     console.log("value of map issues: ", toxicityScoresIssues);
     console.log("value of map comments: ", toxicityScoresComments);
+
+    var numSamples =  numUnderThreshold + numOverThreshold; 
+    console.log("total number of text samples analyzed: ", numSamples); 
+    if (numSamples > 0) {
+      console.log("Proportion of comments exceeding toxicity threshold: ", numOverThreshold/numSamples); 
+    }
     
     // TODO - maybe apply some filtering to the toxicity scores?
-    //  - apply threshold 
-    //  - give toxicity percentage => proportion of comments that exceed the toxicity threshold 
-    //  - maybe don't report all the people that commented 
+    //  [x] apply threshold 
+    //  [ ] give toxicity percentage => proportion of comments that exceed the toxicity threshold 
+    //  [ ] maybe don't report all the people that commented 
 
 
      // const context = github.context;    

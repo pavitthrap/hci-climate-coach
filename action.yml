@@ -7,6 +7,9 @@ inputs:
     repo-name:
         description: 'Name of this repository.'
         required: true
+    google-api-key:
+        description: 'Google API key for using the perspective API. Can be passed in using {{ secrets.GOOGLE_API_KEY }} if you add GOOGLE_API_KEY as a secret to your repository.'
+        required: true
     repo-owner:
         description: 'Owner of this repository.'
         required: true
