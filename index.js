@@ -112,7 +112,7 @@ function getBeginningOfPrevMonth(){
   }
   
   var newDate = new Date(prevYear, prevMonth, 1, 0, 0, 0, 0);
-  console.log("ISO DATE:", currDate.toISOString())
+  console.log("ISO DATE:", newDate.toISOString())
 }
 
 function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresIssues, toxicityScoresComments) {
