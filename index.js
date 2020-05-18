@@ -112,7 +112,8 @@ function getBeginningOfPrevMonth(){
   }
   
   var newDate = new Date(prevYear, prevMonth, 1, 0, 0, 0, 0);
-  console.log("ISO DATE:", newDate.toISOString())
+  console.log("ISO DATE:", newDate.toISOString()); 
+  return newDate;
 }
 
 function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresIssues, toxicityScoresComments) {
@@ -121,11 +122,11 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
       try {
         // TODO -  calculate the date 
         // QUESTION => should I go up to the current date - or not include the month we are in?
-        getBeginningOfPrevMonth(); 
+        var queryDate = getBeginningOfPrevMonth(); 
         const { status, data: issues } = yield client.issues.listForRepo({
             owner: owner,
             repo: repo,
-            since: '2020-04-12T20:12:47Z'
+            since: queryDate
         });
       
         if (status !== 200) {
