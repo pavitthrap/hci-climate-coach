@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 
 const core = require("@actions/core");
 const github = require("@actions/github");
+const removeMd = require('remove-markdown');
 
 var climateMessage = "This is the monthly climate coach report, here to give you an \
   overview of various metrics in this repository, such as responsiveness and tone used in discussions"; 
@@ -49,7 +50,7 @@ function analyzeToxicity(commentAnalyzer, text) {
 
 /* Updates the toxicity score associated with a user + comment/issue ID in the map, tracks number of 
 *  text samples below/ above the threshold
-* @param {float}
+* @param {float} 
 * @param {string}
 * @param {integer}
 * @param {string}
@@ -69,6 +70,24 @@ function updateToxicityInMap(toxicity, user, ID, text, toxicityScores) {
   }
   var userToxicityMap = toxicityScores.get(user);
   userToxicityMap.set(ID, [toxicity, text]);
+}
+
+
+function cleanText(text) {
+  // remove code snippets
+  const regex = /(```.+?```)/;
+  var next = text.replace(regex, ''); 
+  console.log("next: ", next);
+  
+  while (next != text) {
+    text = next;
+    var next = text.replace(regex, ''); 
+    console.log("next: ", next);
+  }
+
+  // remove markdown formatting 
+  var plainText = removeMd(text); 
+  return plainText; 
 }
 
 function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issueText, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer) {
@@ -160,6 +179,15 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
 }
 
 
+// TODO - clean input 
+//   remove code blocks '''
+//   other irrelevant bits (like urls, )
+//   look for markdown parser 
+//   https://github.com/markedjs/marked 
+
+// TODO - run it on moderation examples post input pruning 
+//     - try running sentence by sentence 
+
 function run() {
   return __awaiter(this, void 0, void 0, function* () {
     const {google} = require("googleapis");
@@ -181,10 +209,17 @@ function run() {
 
     var numSamples =  numUnderThreshold + numOverThreshold; 
     console.log("total number of text samples analyzed: ", numSamples); 
+
+    // does numSamples 
     if (numSamples > 0) {
       console.log("Proportion of comments exceeding toxicity threshold: ", numOverThreshold/numSamples); 
     }
     
+
+    const markdown = ' also ``` here is code``` # This is a heading\n\nThis is ``` code pt 2``` a paragraph with [a link](http://www.disney.com/) in it.';
+    var cleaned = cleanText(markdown);
+    console.log("cleaned text: ", cleaned);
+
     // TODO - maybe apply some filtering to the toxicity scores?
     //  [x] apply threshold 
     //  [x] give toxicity percentage => proportion of comments that exceed the toxicity threshold 
