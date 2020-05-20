@@ -76,15 +76,19 @@ function updateToxicityInMap(toxicity, user, ID, text, toxicityScores) {
 function cleanText(text) {
   // remove code snippets
   const regex = /(```.+?```)/;
+  console.log("before replace");
   var next = text.replace(regex, ''); 
   console.log("next: ", next);
   
   while (next != text) {
+    console.log("replacing again... text is: ", text);
     text = next;
+    console.log("before replace");
     var next = text.replace(regex, ''); 
     console.log("next: ", next);
   }
 
+  console.log("before stripping md, next: ", next, ", text: ", text);
   // remove markdown formatting 
   var plainText = removeMd(text); 
   return plainText; 
