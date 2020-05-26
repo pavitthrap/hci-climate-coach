@@ -269,9 +269,9 @@ I would be happy to try, unless there is someone capable of doing it much faster
 
     for (var i = 0; i < texts.length; i++) {
       var text = texts[i]; 
-      var cleaned = cleanText(markdown);
-      var tox1 = analyzeToxicity(commentAnalyzer, text);
-      var tox2 = analyzeToxicity(commentAnalyzer, cleaned);
+      var cleaned = cleanText(text);
+      var tox1 = yield analyzeToxicity(commentAnalyzer, text);
+      var tox2 = yield analyzeToxicity(commentAnalyzer, cleaned);
       console.log("on text number ", i, " : ", text);
       console.log("CLEANED text: ", cleaned);
       console.log("TOX prev: ", tox1, ", TOX clean: ", tox2); 
