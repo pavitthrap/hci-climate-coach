@@ -72,15 +72,17 @@ function updateToxicityInMap(toxicity, user, ID, text, toxicityScores) {
   userToxicityMap.set(ID, [toxicity, text]);
 }
 
-
+// TODO -> use this
 function cleanText(text) {
   // remove code snippets
-  const regex = /(```.+?```)/;
+  var regex = /(```.+?```)/;
+  var regex_inline = /(>.+?\n\n)/;
   var next = text.replace(regex, ''); 
   
   while (next != text) {
     text = next;
     var next = text.replace(regex, ''); 
+    var next = next.replace(regex_inline, ''); 
   }
 
   // remove markdown formatting 
@@ -153,20 +155,20 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
         }
 
         for ( var issue of issues) {
-            var issueUser = issue.user.login;
-            var issueText = issue.title + " " + issue.body; 
-            var issueId = issue.number;
-            var creationTime = issue.created_at;  
-            var creationDate = new Date(creationTime); 
+          console.log("Issue: ", issue);
+          var issueUser = issue.user.login;
+          var issueText = issue.title + " " + issue.body; 
+          var issueId = issue.number;
+          var creationTime = issue.created_at;  
+          var creationDate = new Date(creationTime); 
 
-            if (creationDate.getMonth() != queryDate.getMonth()) {
-              console.log("Only looking at previous month, so returning now to avoid analyzing current month.")
-              // TODO: maybe remove 
-              // return; 
-            }
+          if (creationDate.getMonth() == queryDate.getMonth()) {
+            console.log("Creation of issue is previous month, so analyzing now. Issue #: ", issueId);
 
             // measure toxicity here 
             yield getToxicityScoresForIssue(client, owner, repo, issueUser, issueId, issueText, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer);
+          }
+          return; 
         }
 
         return; 
