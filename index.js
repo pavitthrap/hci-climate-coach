@@ -108,8 +108,11 @@ function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issu
       for (var comment of comments) {
         var toxicity = yield analyzeToxicity(commentAnalyzer, comment.body);
         var user = comment.user.login;
+        var cleaned = cleanText(comment.body);
         updateToxicityInMap(toxicity, user, comment.id, comment.body, toxicityScoresComments)
+        var cleanedToxicity = analyzeToxicity(commentAnalyzer, cleaned);
         console.log("COMMENT TEXT: ", comment.body, " , user: ", user, ", comment Toxicity: ", toxicity);
+        console.log("CLEAN COMMENT TEXT: ", cleaned, ", comment Toxicity: ", cleanedToxicity);
       }
       return;
 
@@ -162,12 +165,15 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
           var creationTime = issue.created_at;  
           var creationDate = new Date(creationTime); 
 
-          if (creationDate.getMonth() == queryDate.getMonth()) {
+          // TODO: remove true
+          if (true || creationDate.getMonth() == queryDate.getMonth()) {
             console.log("Creation of issue is previous month, so analyzing now. Issue #: ", issueId);
 
             // measure toxicity here 
             yield getToxicityScoresForIssue(client, owner, repo, issueUser, issueId, issueText, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer);
           }
+
+          // TODO: remove return 
           return; 
         }
 
