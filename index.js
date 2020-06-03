@@ -24,11 +24,7 @@ data = "Name,Surname,Age,Gender\
 John,Snow,26,M\
 Clair,White,33,F\
 Fancy,Brown,78,F";
-const CSV_STRING = [
-  'header1,header2',
-  'a1,b1',
-  'a2,b2'
-].join(EOL);
+
 
 var climateMessage = "This is the monthly climate coach report, here to give you an \
   overview of various metrics in this repository, such as responsiveness and tone used in discussions"; 
@@ -281,3 +277,10 @@ function run() {
 
 
 run(); 
+
+
+const CSV_STRING = [
+  'header1,header2',
+  'a1,b1',
+  'a2,b2'
+].join(EOL);
