@@ -11,6 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const core = require("@actions/core");
 const github = require("@actions/github");
 const removeMd = require('remove-markdown');
+const csv = require('csv-parser');
+const fs = require('fs');
 
 var climateMessage = "This is the monthly climate coach report, here to give you an \
   overview of various metrics in this repository, such as responsiveness and tone used in discussions"; 
@@ -76,6 +78,7 @@ function updateToxicityInMap(toxicity, user, ID, text, toxicityScores) {
 function cleanText(text) {
   // remove code snippets
   var regex = /(```.+?```)/;
+  var regex_new = /```([^`]|[\r\n])*```/;
   var regex_inline = /(>.+?\n\n)/;
   var next = text.replace(regex, ''); 
   
@@ -110,7 +113,7 @@ function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issu
         var user = comment.user.login;
         var cleaned = cleanText(comment.body);
         updateToxicityInMap(toxicity, user, comment.id, comment.body, toxicityScoresComments)
-        var cleanedToxicity = analyzeToxicity(commentAnalyzer, cleaned);
+        var cleanedToxicity = yield analyzeToxicity(commentAnalyzer, cleaned);
         console.log("COMMENT TEXT: ", comment.body, " , user: ", user, ", comment Toxicity: ", toxicity);
         console.log("CLEAN COMMENT TEXT: ", cleaned, ", comment Toxicity: ", cleanedToxicity);
       }
@@ -222,7 +225,15 @@ function run() {
       console.log("Proportion of comments exceeding toxicity threshold: ", numOverThreshold/numSamples); 
     }
     
-    
+    console.log("about to process csv file");
+    fs.createReadStream('data.csv')
+      .pipe(csv())
+      .on('data', (row) => {
+        console.log(row);
+      })
+      .on('end', () => {
+        console.log('CSV file successfully processed');
+      });
 
     // TODO - maybe apply some filtering to the toxicity scores?
     //  [x] apply threshold 
