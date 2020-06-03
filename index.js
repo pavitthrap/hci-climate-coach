@@ -7,15 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
   });
 };
 
-data = "Name,Surname,Age,Gender\
-John,Snow,26,M\
-Clair,White,33,F\
-Fancy,Brown,78,F";
-const CSV_STRING = [
-  'header1,header2',
-  'a1,b1',
-  'a2,b2'
-].join(EOL);
+
 
 
 const core = require("@actions/core");
@@ -27,6 +19,16 @@ const removeMd = require('remove-markdown');
 
 const { EOL } = require('os');
 const { parse } = require('fast-csv');
+
+data = "Name,Surname,Age,Gender\
+John,Snow,26,M\
+Clair,White,33,F\
+Fancy,Brown,78,F";
+const CSV_STRING = [
+  'header1,header2',
+  'a1,b1',
+  'a2,b2'
+].join(EOL);
 
 var climateMessage = "This is the monthly climate coach report, here to give you an \
   overview of various metrics in this repository, such as responsiveness and tone used in discussions"; 
