@@ -7,12 +7,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
   });
 };
 
+data = "Name,Surname,Age,Gender\
+John,Snow,26,M\
+Clair,White,33,F\
+Fancy,Brown,78,F";
+const CSV_STRING = [
+  'header1,header2',
+  'a1,b1',
+  'a2,b2'
+].join(EOL);
+
 
 const core = require("@actions/core");
 const github = require("@actions/github");
 const removeMd = require('remove-markdown');
-const csv = require('csv-parser');
-const fs = require('fs');
+// const csv = require('csv-parser');
+// const fs = require('fs');
+// const parse = require('csv-parse/lib/sync')
+
+const { EOL } = require('os');
+const { parse } = require('fast-csv');
 
 var climateMessage = "This is the monthly climate coach report, here to give you an \
   overview of various metrics in this repository, such as responsiveness and tone used in discussions"; 
@@ -225,15 +239,25 @@ function run() {
       console.log("Proportion of comments exceeding toxicity threshold: ", numOverThreshold/numSamples); 
     }
     
-    console.log("about to process csv file");
-    fs.createReadStream('data.csv')
-      .pipe(csv())
-      .on('data', (row) => {
-        console.log(row);
+    // console.log("about to process csv file");
+    // fs.createReadStream('data.csv')
+    //   .pipe(csv())
+    //   .on('data', (row) => {
+    //     console.log(row);
+    //   })
+    //   .on('end', () => {
+    //     console.log('CSV file successfully processed');
+    //   });
+
+    const stream = parse({
+      headers: headers => headers.map(h => h.toUpperCase()),
       })
-      .on('end', () => {
-        console.log('CSV file successfully processed');
-      });
+      .on('error', error => console.error(error))
+      .on('data', row => console.log(row))
+      .on('end', rowCount => console.log(`Parsed ${rowCount} rows`));
+
+    stream.write(CSV_STRING);
+    stream.end();
 
     // TODO - maybe apply some filtering to the toxicity scores?
     //  [x] apply threshold 
