@@ -280,7 +280,8 @@ run();
 
 
 const CSV_STRING = [
-  'header1,header2',
-  'a1,b1',
-  'a2,b2'
+  "Name,Surname,Age,Gender",
+  "John,Snow,26,M",
+  "Clair,White,33,F",
+  "Fancy,Brown,78,F",
 ].join(EOL);

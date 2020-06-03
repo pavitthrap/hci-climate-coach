@@ -1,5 +1,12 @@
-f = open('train_comments.csv', "r")
+f = open('data.csv', "r") # train_comments
 lines = f.readlines()
 f.close()
 
-print(lines[0])
+new_format = ""
+
+for line in lines: 
+    new_format += "\""
+    new_format += line.rstrip()
+    new_format += "\",\n"
+
+print(new_format)
