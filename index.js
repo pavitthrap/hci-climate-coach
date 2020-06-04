@@ -90,16 +90,16 @@ function updateToxicityInMap(toxicity, user, ID, text, toxicityScores) {
 function cleanText(text) {
   console.log("starting text: ", text);
   // remove code snippets
-  var regex_code = /```[a-z]*\n[\s\S]*?\n```/g;
+  var regex_code = /```[a-z ]*\n[\s\S]*?\n```/g;
   // var regex_new = /```([^`]|[\r\n])*```/;
   var regex_inline = /(^> ?.+?)((\r?\n\r?\n)|\Z)/gms;
   var regex_url = /(https:\/\/.*?( |[\n\r]))|(http:\/\/.*?( |[\n\r]))/g;
   var next = text.replace(regex_code, ''); 
-  console.log("after removing code blocks: ", next); 
-  var next = text.replace(regex_inline, ''); 
-  console.log("after removing block quotes: ", next); 
-  var next = text.replace(regex_url, ''); 
-  console.log("after removing urls: ", next); 
+  console.log("\nafter removing code blocks: ", next); 
+  var next = next.replace(regex_inline, ''); 
+  console.log("\nafter removing block quotes: ", next); 
+  var next = next.replace(regex_url, ''); 
+  console.log("\nafter removing urls: ", next); 
   
   // while (next != text) {
   //   text = next;
