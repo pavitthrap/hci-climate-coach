@@ -88,20 +88,28 @@ function updateToxicityInMap(toxicity, user, ID, text, toxicityScores) {
 
 // TODO -> use this
 function cleanText(text) {
+  console.log("starting text: ", text);
   // remove code snippets
-  var regex = /(```.+?```)/;
-  var regex_new = /```([^`]|[\r\n])*```/;
-  var regex_inline = /(>.+?\n\n)/;
-  var next = text.replace(regex, ''); 
+  var regex_code = /```[a-z]*\n[\s\S]*?\n```/g;
+  // var regex_new = /```([^`]|[\r\n])*```/;
+  var regex_inline = /(^> ?.+?)((\r?\n\r?\n)|\Z)/gms;
+  var regex_url = /(https:\/\/.*?( |[\n\r]))|(http:\/\/.*?( |[\n\r]))/g;
+  var next = text.replace(regex_code, ''); 
+  console.log("after removing code blocks: ", next); 
+  var next = text.replace(regex_inline, ''); 
+  console.log("after removing block quotes: ", next); 
+  var next = text.replace(regex_url, ''); 
+  console.log("after removing urls: ", next); 
   
-  while (next != text) {
-    text = next;
-    var next = text.replace(regex, ''); 
-    var next = next.replace(regex_inline, ''); 
-  }
+  // while (next != text) {
+  //   text = next;
+  //   var next = text.replace(regex, ''); 
+  //   var next = next.replace(regex_inline, ''); 
+  // }
 
   // remove markdown formatting 
-  var plainText = removeMd(text); 
+  var plainText = removeMd(next); 
+  console.log("after removing md: ", plainText); 
   return plainText; 
 }
 
@@ -275,7 +283,6 @@ function run() {
 
 }
 
-
 run(); 
 
 
@@ -284,4 +291,11 @@ const CSV_STRING = [
   "John,Snow,26,M",
   "Clair,White,33,F",
   "Fancy,Brown,78,F",
+].join(EOL);
+
+
+
+
+
+const CSV_GITHUB_STRING = [
 ].join(EOL);

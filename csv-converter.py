@@ -1,12 +1,21 @@
-f = open('data.csv', "r") # train_comments
+f = open('train_comments.csv', "r") # train_comments
 lines = f.readlines()
 f.close()
 
 new_format = ""
+print(len(lines))
 
+i = 0 
 for line in lines: 
-    new_format += "\""
-    new_format += line.rstrip()
-    new_format += "\",\n"
+    if (i < 100):
+        new_format += "\'"
+        new_format += line.rstrip()
+        new_format += "\',\n"
+        i += 1
+    else: 
+        break 
 
-print(new_format)
+
+text_file = open("output.txt", "w")
+n = text_file.write(new_format)
+text_file.close()
