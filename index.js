@@ -89,9 +89,9 @@ function updateToxicityInMap(toxicity, user, ID, text, toxicityScores) {
 // TODO -> use this
 function cleanText(text) {
   console.log("starting text: ", text);
-  console.log("\n TEXT contains backtick?:", next.includes("`"));
-  console.log("\n TEXT contains inline?:", next.includes(">"));
-  
+  console.log("\n TEXT contains backtick?:", text.includes("`"));
+  console.log("\n TEXT contains inline?:", text.includes(">"));
+
   // remove code snippets
   var regex_code = /```[a-z ]*\n[\s\S]*?\n```/g;
   // var regex_new = /```([^`]|[\r\n])*```/;
