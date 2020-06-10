@@ -280,18 +280,36 @@ function run() {
       })
       .on('error', error => console.error(error))
       .on('data', row => {
-        console.log(row);
         pre_data.push(row);
       })
       .on('end', rowCount => {
         console.log(`Parsed ${rowCount} rows`);
-        console.log(pre_data);
     });
     
     stream.write(CSV_GITHUB_STRING);
     stream.end();
 
     console.log("done with stream, pre_data is:", pre_data); 
+
+
+    var queryParameter = ()=> new Promise( resolve => {
+      let returnLit = []
+      parse({
+        headers: headers => headers.map(h => h.toUpperCase()),
+        })
+        .on('error', error => console.error(error))
+        .on('data', row => {
+          returnLit.push(row);
+        })
+        .on('end', rowCount => {
+          console.log(`Parsed ${rowCount} rows`);
+          resolve(returnLit);
+      })
+    })
+    var mainList = [];
+    queryParameter().then((res)=>mainList = res)
+
+    console.log("mainlist is:", mainList)
     
     data = [["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"]];
 
