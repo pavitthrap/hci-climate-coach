@@ -274,7 +274,6 @@ function run() {
     //     console.log('CSV file successfully processed');
     //   });
 
-    data = [["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"]];
     pre_data = []
     const stream = parse({
       headers: headers => headers.map(h => h.toUpperCase()),
@@ -286,9 +285,13 @@ function run() {
     stream.write(CSV_GITHUB_STRING);
     stream.end();
 
-    print("done with stream, pre_data is:", pre_data); 
+    console.log("done with stream, pre_data is:", pre_data); 
     
-    
+    data = [["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"]];
+
+    for (var i=0; i < pre_data.length; i++) {
+      yield processRow(commentAnalyzer, data, pre_data[i]);
+    }
 
     var csvContent = '';
     data.forEach(function(infoArray, index) {
