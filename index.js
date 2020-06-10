@@ -222,16 +222,18 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
 //     - try running sentence by sentence 
 
 function processRow(commentAnalyzer, data, row) {
-  console.log(row); 
-  console.log(row.text);
-  
-  var text = row.text; 
-  var cleaned = cleanText(text);
-  var toxicity_before = yield analyzeToxicity(commentAnalyzer, text);
-  var toxicity_after = yield analyzeToxicity(commentAnalyzer, cleaned);
-  
-  new_data = [text, cleaned, row.toxicity, toxicity_before, toxicity_after]; 
-  data.push(new_data); 
+  return __awaiter(this, void 0, void 0, function* () {
+    console.log(row); 
+    console.log(row.text);
+    
+    var text = row.text; 
+    var cleaned = cleanText(text);
+    var toxicity_before = yield analyzeToxicity(commentAnalyzer, text);
+    var toxicity_after = yield analyzeToxicity(commentAnalyzer, cleaned);
+    
+    new_data = [text, cleaned, row.toxicity, toxicity_before, toxicity_after]; 
+    data.push(new_data); 
+  });
 }
 
 
@@ -278,7 +280,7 @@ function run() {
       headers: headers => headers.map(h => h.toUpperCase()),
       })
       .on('error', error => console.error(error))
-      .on('data', row => processRow(commentAnalyzer, data, row))
+      .on('data', row => yield processRow(commentAnalyzer, data, row))
       .on('end', rowCount => console.log(`Parsed ${rowCount} rows`));
 
     stream.write(CSV_GITHUB_STRING);
