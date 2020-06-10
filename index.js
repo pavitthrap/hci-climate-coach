@@ -279,8 +279,14 @@ function run() {
       headers: headers => headers.map(h => h.toUpperCase()),
       })
       .on('error', error => console.error(error))
-      .on('data', row => pre_data.push(row))
-      .on('end', rowCount => console.log(`Parsed ${rowCount} rows`));
+      .on('data', row => {
+        console.log(row);
+        pre_data.push(row);
+      })
+      .on('end', rowCount => {
+        console.log(`Parsed ${rowCount} rows`);
+        console.log(pre_data);
+    });
     
     stream.write(CSV_GITHUB_STRING);
     stream.end();
