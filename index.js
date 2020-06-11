@@ -223,8 +223,8 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
 
 function processRow(commentAnalyzer, data, row) {
   return __awaiter(this, void 0, void 0, function* () {
-    console.log(row); 
-    console.log(row.text);
+    console.log(row, row.keys()); 
+    console.log(row.TEXT);
     
     var text = row.text; 
     var cleaned = cleanText(text);
@@ -238,7 +238,7 @@ function processRow(commentAnalyzer, data, row) {
 
 function processAllData(commentAnalyzer, pre_data) {
   return __awaiter(this, void 0, void 0, function* () {
-    console.log(pre_data);
+    console.log("LENGTH:", pre_data.length);
     var data = [["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"]];
 
     for (var i=0; i < pre_data.length; i++) {
@@ -255,6 +255,7 @@ function processAllData(commentAnalyzer, pre_data) {
       // In case of a error throw err. 
       if (err) throw err; 
     }) 
+    console.log("wrote to file...");
   }); 
 }
 
@@ -405,10 +406,4 @@ const CSV_GITHUB_STRING = [
 'A3-Antistasi/A3Antistasi/57/393246500,0.23249999999999998,0.065765075,A3Antistasi,A3-Antistasi,0,"belive me it’s not low priority task, it’s very very important task you are very good man if you do, it’s not so complicated ",0,0.4036337884085769,0.77,0,0,0.749,n',
 'A3-Antistasi/A3Antistasi/57/393329149,0.45,0.04779639,A3Antistasi,A3-Antistasi,0,but there are more important tasks and my time is not unlimited ,0,0.399852619319327,0.75,0,0,0.3898,n',
 'A3-Antistasi/A3Antistasi/57/393766966,0.2,0.043971922,A3Antistasi,A3-Antistasi,0,"yeah, I did not expect anything else, thanks ",0,0.47919589065878826,0.2,0,0,0.6249,n',
-'A3-Antistasi/A3Antistasi/57/393819419,-0.6,0.87185377,A3Antistasi,A3-Antistasi,0,"If you want to make it quicker you can allways provide the code here and I Will implement it in seconds. And if not, after telling you that I Will do, you come here with hurry and get dissapointed because I tell you the priorities of the mission development????? May I say that I am not your fucking slave or is it incorrect? ",0,0.480414793537601,0.8,0,0,0.3094,y',
-'A3-Antistasi/A3Antistasi/57/393877509,0.275,0.07621317,A3Antistasi,A3-Antistasi,0,"@friend actually yes it is, i understand the frustation but lets keep it respectfull and enjoyable for everyone, especially that I think you guys just misunderstood due to language translation. In the meantime @friend you are more than welcome to fork this repo, fix this issue and send us a pull request ;) I invite everyone to take 5minute to read this  ",1,0.640938615784803,0.6392857142857142,0,2,0.8825,n',
-'A3-Antistasi/A3Antistasi/57/393885143,0.08333333333333333,0.06503355,A3Antistasi,A3-Antistasi,0,What is not subject to translations is your -1 reaction and your closing of the Issue ,0,0.49042496898363536,0.3333333333333333,0,0,0,n',
-'A3-Antistasi/A3Antistasi/57/394032149,-0.026767676767676774,0.022551456,A3Antistasi,A3-Antistasi,0,"It\'s actually a functionality which we have already implemented in the community version of Antistasi. It worked this way There was a parameter ""Allow to start a new campaign"" which was OFF by default. If you wanted to start a new campaign, you\'d set it to ON manually and then the menu would ask you if you wanted to make a new start. The reason behind this is to ease the administration of automatic server restarts when there is no administration instantly available. It also helped us a lot at the official server because users would just join the game and the progress would get loaded. I am not sure if the autoload is currently present in the mission. ",0,0.7588695103536617,0.4280583613916947,0,0,0.6414,n',
-'A3-Antistasi/A3Antistasi/57/394152150,0.2523809523809524,0.07656974,A3Antistasi,A3-Antistasi,0,"Honestly, it\'s unclear who this dude thinks himself to talk to me like that. I could certainly put this rude person in place, but I\'m not going to do it. You can do what you think is necessary, but I\'m not going to help you any more. And more - you can use Google translator when reading the text, without risking to lose the sense of what is written. ",0,0.5231841655321945,0.6785714285714285,0,0,0.5256,n',
-'A3-Antistasi/A3Antistasi/57/394156172,0.125,0.4254566,A3Antistasi,A3-Antistasi,0,"This dude is the owner of this mission and got all rights on this code, if it says it\'s interresting but got more important issues that\'s how it is. You\'ve been welcomed multiple times to  as you said. Your ambiguous comments (that you deleted...) and you closing the issue show your lack of maturity. Even worse, you are threatening people on a collaborative platform ? Closing issue drama has not is place here. ",0,0.37726502718881977,0.525,0,0,-0.7882,n',
 ].join(EOL);
