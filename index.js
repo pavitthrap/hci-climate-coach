@@ -296,10 +296,10 @@ function run() {
     var labelString = labels.join(';') + '\n';
     console.log("Label string is: ", labelString); 
 
-    fs.writeFile('report.csv', labelString, (err) => { 
-      // In case of a error throw err. 
-      if (err) throw err; 
-    }) 
+    // fs.writeFile('report.csv', labelString, (err) => { 
+    //   // In case of a error throw err. 
+    //   if (err) throw err; 
+    // }) 
 
     var queryParameter = ()=> new Promise( resolve => {
       let returnLit = []
