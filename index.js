@@ -223,7 +223,7 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
 
 function processRow(commentAnalyzer, data, row) {
   return __awaiter(this, void 0, void 0, function* () {
-    console.log(row, row.keys()); 
+    console.log(row); 
     console.log(row.TEXT);
     
     var text = row.text; 
