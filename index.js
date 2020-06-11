@@ -236,6 +236,27 @@ function processRow(commentAnalyzer, data, row) {
   });
 }
 
+function processAllData(pre_data) {
+  return __awaiter(this, void 0, void 0, function* () {
+    var data = [["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"]];
+
+    for (var i=0; i < pre_data.length; i++) {
+      yield processRow(commentAnalyzer, data, pre_data[i]);
+    }
+
+    var csvContent = '';
+    data.forEach(function(infoArray, index) {
+      dataString = infoArray.join(';');
+      csvContent += index < data.length ? dataString + '\n' : dataString;
+    });
+
+    fs.writeFile('report.csv', csvContent, (err) => { 
+      // In case of a error throw err. 
+      if (err) throw err; 
+    }) 
+  }); 
+}
+
 
 function run() {
   return __awaiter(this, void 0, void 0, function* () {
@@ -284,24 +305,8 @@ function run() {
       })
       .on('end', async function (rowCount) {
         console.log(`Parsed ${rowCount} rows`);
-        var data = [["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"]];
-
-        for (var i=0; i < pre_data.length; i++) {
-          yield processRow(commentAnalyzer, data, pre_data[i]);
-        }
-    
-        var csvContent = '';
-        data.forEach(function(infoArray, index) {
-          dataString = infoArray.join(';');
-          csvContent += index < data.length ? dataString + '\n' : dataString;
-        });
-
-         fs.writeFile('report.csv', csvContent, (err) => { 
-            // In case of a error throw err. 
-            if (err) throw err; 
-          }) 
-
-    });
+        processAllData(pre_data);
+      });
     
     stream.write(CSV_GITHUB_STRING);
     stream.end();
