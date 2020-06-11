@@ -292,6 +292,15 @@ function run() {
     console.log("done with stream, pre_data is:", pre_data); 
 
 
+    var labels = ["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"];
+    var labelString = labels.join(';') + '\n';
+    console.log("Label string is: ", labelString); 
+
+    fs.writeFile('report.csv', labelString, (err) => { 
+      // In case of a error throw err. 
+      if (err) throw err; 
+    }) 
+
     var queryParameter = ()=> new Promise( resolve => {
       let returnLit = []
       parse({
@@ -300,7 +309,7 @@ function run() {
         .on('error', error => console.error(error))
         .on('data', row => {
           returnLit.push(row);
-          fs.writeFile('report.csv', row, (err) => { 
+          fs.appendFile('report.csv', row, (err) => { 
             // In case of a error throw err. 
             if (err) throw err; 
           }) 
@@ -315,7 +324,7 @@ function run() {
 
     console.log("mainlist is:", mainList)
     
-    data = [["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"]];
+    var data = [["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"]];
 
     for (var i=0; i < pre_data.length; i++) {
       yield processRow(commentAnalyzer, data, pre_data[i]);
@@ -327,10 +336,7 @@ function run() {
       csvContent += index < data.length ? dataString + '\n' : dataString;
     });
 
-    fs.writeFile('report.csv', csvContent, (err) => { 
-      // In case of a error throw err. 
-      if (err) throw err; 
-    }) 
+   
 
     // TODO - maybe apply some filtering to the toxicity scores?
     //  [x] apply threshold 
