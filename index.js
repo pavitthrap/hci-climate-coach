@@ -236,7 +236,7 @@ function processRow(commentAnalyzer, data, row) {
   });
 }
 
-function processAllData(pre_data) {
+function processAllData(commentAnalyzer, pre_data) {
   return __awaiter(this, void 0, void 0, function* () {
     var data = [["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"]];
 
@@ -305,7 +305,7 @@ function run() {
       })
       .on('end', async function (rowCount) {
         console.log(`Parsed ${rowCount} rows`);
-        processAllData(pre_data);
+        processAllData(commentAnalyzer, pre_data);
       });
     
     stream.write(CSV_GITHUB_STRING);
