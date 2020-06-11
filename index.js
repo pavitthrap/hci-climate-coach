@@ -282,7 +282,7 @@ function run() {
       .on('data', row => {
         pre_data.push(row);
       })
-      .on('end', rowCount => {
+      .on('end', async function (rowCount) {
         console.log(`Parsed ${rowCount} rows`);
         var data = [["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"]];
 
