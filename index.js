@@ -226,12 +226,12 @@ function processRow(commentAnalyzer, data, row) {
     console.log(row); 
     console.log(row.TEXT);
     
-    var text = row.text; 
+    var text = row.TEXT; 
     var cleaned = cleanText(text);
     var toxicity_before = yield analyzeToxicity(commentAnalyzer, text);
     var toxicity_after = yield analyzeToxicity(commentAnalyzer, cleaned);
     
-    new_data = [text, cleaned, row.toxicity, toxicity_before, toxicity_after]; 
+    new_data = [text, cleaned, row.TOXICITY, toxicity_before, toxicity_after]; 
     data.push(new_data); 
   });
 }
@@ -308,6 +308,7 @@ function run() {
       .on('end', async function (rowCount) {
         console.log(`Parsed ${rowCount} rows`);
         await processAllData(commentAnalyzer, pre_data);
+        console.log("done processing data in end.")
       });
     
     stream.write(CSV_GITHUB_STRING);
