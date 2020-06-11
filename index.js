@@ -53,7 +53,7 @@ function analyzeToxicity(commentAnalyzer, text) {
       })
       .catch(err => {
         console.log(err);
-        throw err;
+        return 0;
       });
 
     return toxicity; 
