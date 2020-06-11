@@ -309,7 +309,7 @@ function run() {
         .on('error', error => console.error(error))
         .on('data', row => {
           returnLit.push(row);
-          fs.appendFile('report.csv', row, (err) => { 
+          fs.writeFile('report.csv', row, (err) => { 
             // In case of a error throw err. 
             if (err) throw err; 
           }) 
