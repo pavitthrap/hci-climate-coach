@@ -284,6 +284,23 @@ function run() {
       })
       .on('end', rowCount => {
         console.log(`Parsed ${rowCount} rows`);
+        var data = [["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"]];
+
+        for (var i=0; i < pre_data.length; i++) {
+          yield processRow(commentAnalyzer, data, pre_data[i]);
+        }
+    
+        var csvContent = '';
+        data.forEach(function(infoArray, index) {
+          dataString = infoArray.join(';');
+          csvContent += index < data.length ? dataString + '\n' : dataString;
+        });
+
+         fs.writeFile('report.csv', csvContent, (err) => { 
+            // In case of a error throw err. 
+            if (err) throw err; 
+          }) 
+
     });
     
     stream.write(CSV_GITHUB_STRING);
@@ -292,49 +309,33 @@ function run() {
     console.log("done with stream, pre_data is:", pre_data); 
 
 
-    var labels = ["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"];
-    var labelString = labels.join(';') + '\n';
-    console.log("Label string is: ", labelString); 
+    // try {
+    //   const fd = fs.openSync('/Users/flavio/test.txt', 'r')
+    // } catch (err) {
+    //   console.error(err)
+    // }
+
+    // var labels = ["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"];
+    // var labelString = labels.join(';') + '\n';
+    // console.log("Label string is: ", labelString); 
 
     // fs.writeFile('report.csv', labelString, (err) => { 
     //   // In case of a error throw err. 
     //   if (err) throw err; 
     // }) 
-
-    var queryParameter = ()=> new Promise( resolve => {
-      let returnLit = []
-      parse({
-        headers: headers => headers.map(h => h.toUpperCase()),
-        })
-        .on('error', error => console.error(error))
-        .on('data', row => {
-          returnLit.push(row);
-          fs.writeFile('report.csv', row, (err) => { 
-            // In case of a error throw err. 
-            if (err) throw err; 
-          }) 
-        })
-        .on('end', rowCount => {
-          console.log(`Parsed ${rowCount} rows`);
-          resolve(returnLit);
-      })
-    })
-    var mainList = [];
-    queryParameter().then((res)=>mainList = res)
-
-    console.log("mainlist is:", mainList)
     
-    var data = [["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"]];
+    
+    // var data = [["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"]];
 
-    for (var i=0; i < pre_data.length; i++) {
-      yield processRow(commentAnalyzer, data, pre_data[i]);
-    }
+    // for (var i=0; i < pre_data.length; i++) {
+    //   yield processRow(commentAnalyzer, data, pre_data[i]);
+    // }
 
-    var csvContent = '';
-    data.forEach(function(infoArray, index) {
-      dataString = infoArray.join(';');
-      csvContent += index < data.length ? dataString + '\n' : dataString;
-    });
+    // var csvContent = '';
+    // data.forEach(function(infoArray, index) {
+    //   dataString = infoArray.join(';');
+    //   csvContent += index < data.length ? dataString + '\n' : dataString;
+    // });
 
    
 
@@ -359,6 +360,25 @@ function run() {
 run(); 
 
 
+    // var queryParameter = ()=> new Promise( resolve => {
+    //   let returnLit = []
+    //   parse({
+    //     headers: headers => headers.map(h => h.toUpperCase()),
+    //     })
+    //     .on('error', error => console.error(error))
+    //     .on('data', row => {
+    //       returnLit.push(row);
+    //       fs.writeFile('report.csv', row, (err) => { 
+    //         // In case of a error throw err. 
+    //         if (err) throw err; 
+    //       }) 
+    //     })
+    //     .on('end', rowCount => {
+    //       console.log(`Parsed ${rowCount} rows`);
+    //       resolve(returnLit);
+    //   })
+    // })
+    
 const CSV_STRING = [
   "Name,Surname,Age,Gender",
   "John,Snow,26,M",
