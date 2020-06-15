@@ -53,7 +53,7 @@ function analyzeToxicity(commentAnalyzer, text) {
       })
       .catch(err => {
         console.log(err);
-        return 0;
+        return -1;
       });
 
     return toxicity; 
@@ -91,16 +91,20 @@ function cleanText(text) {
   console.log("\n TEXT contains inline?:", text.includes(">"));
 
   // remove code snippets
-  var regex_code = /```[a-z ]*\n[\s\S]*?\n```/g;
+  var regex_code = /```[a-z ]*\n[\s\S]*?\n```/gms;
+  var regex_inline_code= /`[a-z ]*\n?[\s\S]*?\n?`/gms;
   // var regex_new = /```([^`]|[\r\n])*```/;
   var regex_inline = /(^> ?.+?)((\r?\n\r?\n)|\Z)/gms;
   var regex_url = /(https:\/\/.*?([\s]|$))|(http:\/\/.*?([\s]|$))/g;
+
   var next = text.replace(regex_code, ''); 
-  console.log("\nafter removing code blocks: ", next); 
+  console.log("\nAFTER removing code blocks: ", next); 
+  var next = next.replace(regex_inline_code, ''); 
+  console.log("\nAFTER removing inline code blocks: ", next); 
   var next = next.replace(regex_inline, ''); 
-  console.log("\nafter removing block quotes: ", next); 
+  console.log("\nAFTER removing block quotes: ", next); 
   var next = next.replace(regex_url, ''); 
-  console.log("\nafter removing urls: ", next); 
+  console.log("\nAFTER removing urls: ", next); 
   
 
 
@@ -317,36 +321,6 @@ function run() {
     console.log("done with stream, pre_data is:", pre_data); 
 
 
-    // try {
-    //   const fd = fs.openSync('/Users/flavio/test.txt', 'r')
-    // } catch (err) {
-    //   console.error(err)
-    // }
-
-    // var labels = ["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"];
-    // var labelString = labels.join(';') + '\n';
-    // console.log("Label string is: ", labelString); 
-
-    // fs.writeFile('report.csv', labelString, (err) => { 
-    //   // In case of a error throw err. 
-    //   if (err) throw err; 
-    // }) 
-    
-    
-    // var data = [["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean"]];
-
-    // for (var i=0; i < pre_data.length; i++) {
-    //   yield processRow(commentAnalyzer, data, pre_data[i]);
-    // }
-
-    // var csvContent = '';
-    // data.forEach(function(infoArray, index) {
-    //   dataString = infoArray.join(';');
-    //   csvContent += index < data.length ? dataString + '\n' : dataString;
-    // });
-
-   
-
     // TODO - maybe apply some filtering to the toxicity scores?
     //  [x] apply threshold 
     //  [x] give toxicity percentage => proportion of comments that exceed the toxicity threshold 
@@ -368,25 +342,6 @@ function run() {
 run(); 
 
 
-    // var queryParameter = ()=> new Promise( resolve => {
-    //   let returnLit = []
-    //   parse({
-    //     headers: headers => headers.map(h => h.toUpperCase()),
-    //     })
-    //     .on('error', error => console.error(error))
-    //     .on('data', row => {
-    //       returnLit.push(row);
-    //       fs.writeFile('report.csv', row, (err) => { 
-    //         // In case of a error throw err. 
-    //         if (err) throw err; 
-    //       }) 
-    //     })
-    //     .on('end', rowCount => {
-    //       console.log(`Parsed ${rowCount} rows`);
-    //       resolve(returnLit);
-    //   })
-    // })
-    
 const CSV_STRING = [
   "Name,Surname,Age,Gender",
   "John,Snow,26,M",
@@ -408,3 +363,13 @@ const CSV_GITHUB_STRING = [
 'A3-Antistasi/A3Antistasi/57/393329149,0.45,0.04779639,A3Antistasi,A3-Antistasi,0,but there are more important tasks and my time is not unlimited ,0,0.399852619319327,0.75,0,0,0.3898,n',
 'A3-Antistasi/A3Antistasi/57/393766966,0.2,0.043971922,A3Antistasi,A3-Antistasi,0,"yeah, I did not expect anything else, thanks ",0,0.47919589065878826,0.2,0,0,0.6249,n',
 ].join(EOL);
+
+
+// Questions 
+//  need to fix code parser 
+//  remove inline code blocks? -> single backtick 
+
+
+// With Outpute CSV File
+//  get average persepective toxicity (before & after parsing) for all toxic/not comments 
+// 
