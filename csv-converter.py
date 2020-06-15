@@ -7,7 +7,7 @@ print(len(lines))
 
 i = 0 
 for line in lines: 
-    if (i < 100):
+    if (i < 20):
         new_format += "\'"
         new_format += line.rstrip().replace("'", "\\'").replace(";", " ")
         new_format += "\',\n"
