@@ -97,9 +97,9 @@ function cleanText(text) {
   var regex_inline = /(^> ?.+?)((\r?\n\r?\n)|\Z)/gms;
   var regex_url = /(https:\/\/.*?([\s]|$))|(http:\/\/.*?([\s]|$))/g;
 
-  var next = text.replace(regex_code, ''); 
-  console.log("\nAFTER removing code blocks: ", next); 
-  var next = next.replace(regex_inline_code, ''); 
+  // var next = text.replace(regex_code, ''); 
+  // console.log("\nAFTER removing code blocks: ", next); 
+  var next = text.replace(regex_inline_code, ''); 
   console.log("\nAFTER removing inline code blocks: ", next); 
   var next = next.replace(regex_inline, ''); 
   console.log("\nAFTER removing block quotes: ", next); 
