@@ -5,9 +5,11 @@ f.close()
 new_format = ""
 print(len(lines))
 
+# + 3
+
 i = 0 
 for line in lines: 
-    if (i < 1003):
+    if (i < 1500):
         new_format += "\'"
         new_format += line.rstrip().replace("'", "\\'").replace(";", " ")
         new_format += "\',\n"
