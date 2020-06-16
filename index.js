@@ -219,12 +219,11 @@ function processRow(commentAnalyzer, data, row) {
     var toxicity_after = yield analyzeToxicity(commentAnalyzer, cleaned);
     
     if (toxicity_after != -1 & toxicity_before!= -1) {
-      new_data = [row.ID, text, cleaned, row.TOXICITY, toxicity_before, toxicity_after, row.POLARITY, row.STANFORD_POLITE, row.NLTK_SCORE]; 
+      new_data = [row._ID, text, cleaned, row.TOXICITY, toxicity_before, toxicity_after, row.POLARITY, row.STANFORD_POLITE, row.NLTK_SCORE]; 
       data.push(new_data); 
     } else {
       console.log("toxicity was -1");
     }
-    sleep(100);
 
   });
     
@@ -237,6 +236,9 @@ function processAllData(commentAnalyzer, pre_data) {
 
     for (var i=0; i < pre_data.length; i++) {
       yield processRow(commentAnalyzer, data, pre_data[i]);
+      setTimeout(function() {
+        console.log("sleep");
+      }, 200);
     }
 
     var csvContent = '';
