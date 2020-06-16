@@ -213,9 +213,6 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
 
 function processRow(commentAnalyzer, data, row) {
   return __awaiter(this, void 0, void 0, function* () {
-    console.log(row); 
-    console.log(row.TEXT);
-    
     var text = row.TEXT; 
     var cleaned = cleanText(text);
     var toxicity_before = yield analyzeToxicity(commentAnalyzer, text);
