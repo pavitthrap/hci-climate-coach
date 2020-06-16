@@ -224,7 +224,7 @@ function processRow(commentAnalyzer, data, row) {
     } else {
       console.log("toxicity was -1");
     }
-    await sleep(100);
+    sleep(100);
 
   });
     
