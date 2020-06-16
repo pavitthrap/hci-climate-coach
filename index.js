@@ -89,8 +89,6 @@ function updateToxicityInMap(toxicity, user, ID, text, toxicityScores) {
 
 // TODO -> use this
 function cleanText(text) {
-  console.log("starting text: ", text);
-
   // remove code snippets
   var regex_inline_code= /`[a-z ]*\n?[\s\S]*?\n?`/gms;
   var regex_inline = /(^> ?.+?)((\r?\n\r?\n)|\Z)/gms;
@@ -102,7 +100,6 @@ function cleanText(text) {
   
   // remove markdown formatting 
   var plainText = removeMd(next); 
-  console.log("after removing md: ", plainText); 
   return plainText; 
 }
 
@@ -203,6 +200,9 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
   });
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 // TODO - clean input 
 //   [x] remove code blocks '''
@@ -219,11 +219,13 @@ function processRow(commentAnalyzer, data, row) {
     var toxicity_after = yield analyzeToxicity(commentAnalyzer, cleaned);
     
     if (toxicity_after != -1 & toxicity_before!= -1) {
-      new_data = [text, cleaned, row.TOXICITY, toxicity_before, toxicity_after, row.POLARITY, row.STANFORD_POLITE, row.NLTK_SCORE]; 
+      new_data = [row.ID, text, cleaned, row.TOXICITY, toxicity_before, toxicity_after, row.POLARITY, row.STANFORD_POLITE, row.NLTK_SCORE]; 
       data.push(new_data); 
     } else {
       console.log("toxicity was -1");
     }
+    await sleep(100);
+
   });
     
 }
@@ -231,7 +233,7 @@ function processRow(commentAnalyzer, data, row) {
 function processAllData(commentAnalyzer, pre_data) {
   return __awaiter(this, void 0, void 0, function* () {
     console.log("LENGTH:", pre_data.length);
-    var data = [["text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean", "polarity", "politeness", "nltk_score"]];
+    var data = [["id", "text", "clean_text", "toxic_label", "toxicity_pre_clean", "toxicity_post_clean", "polarity", "politeness", "nltk_score"]];
 
     for (var i=0; i < pre_data.length; i++) {
       yield processRow(commentAnalyzer, data, pre_data[i]);
