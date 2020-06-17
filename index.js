@@ -307,8 +307,8 @@ function run() {
         console.log("done processing data in end.")
       });
     
-    stream.write(CSV_GITHUB_STRING);
-    stream.end();
+    //stream.write(CSV_GITHUB_STRING);
+    //stream.end();
 
     console.log("done with stream, pre_data is:", pre_data); 
 
