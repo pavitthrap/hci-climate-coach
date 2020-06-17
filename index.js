@@ -272,7 +272,7 @@ function run() {
 
     yield getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresIssues, toxicityScoresComments);
 
-    var sample = "Implemented build step functionality  Eiffel json schema's cloned from github eiffel repo, topic-drop4 branch. Eiffel Schema Changes  for jsonSchema2pojo generation plugin ### Added required properties JavaType ExtendedJavaType    Modified eiffel shcema's 1. Changed time format 2. Removed 's' from class names ending with that letter";
+    var sample = "Implemented build step functionality  Eiffel json schema's cloned from github eiffel repo, topic-drop4 branch. Eiffel Schema Changes  for jsonSchema2pojo generation plugin \n### Added required properties JavaType ExtendedJavaType    Modified eiffel shcema's \n1. Changed time format \n2. Removed 's' from class names ending with that letter";
     console.log('cleaned sample: ', cleanText(sample));
 
     console.log("value of map issues: ", toxicityScoresIssues);
