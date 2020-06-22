@@ -105,7 +105,7 @@ function cleanText(text) {
   return plainText; 
 }
 
-function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issueText, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer) {
+function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issueText, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer, allUsers) {
   return __awaiter(this, void 0, void 0, function* () {
     
     console.log("analyzing issue text... ");
@@ -114,7 +114,7 @@ function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issu
 
     console.log('getting comments...\n');
     try {
-      const {data: comments} = yield client.issues.listComments({
+      const {data: comments} = yield client.o({
           owner: owner,
           repo: repo,
           issue_number: issueID,
@@ -128,6 +128,9 @@ function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issu
         var cleanedToxicity = yield analyzeToxicity(commentAnalyzer, cleaned);
         console.log("COMMENT TEXT: ", comment.body, " , user: ", user, ", comment Toxicity: ", toxicity);
         console.log("CLEAN COMMENT TEXT: ", cleaned, ", comment Toxicity: ", cleanedToxicity);
+
+        allUsers.set(user, comment.created_at);
+
       }
       return;
 
@@ -153,7 +156,7 @@ function getBeginningOfPrevMonth(){
   return newDate;
 }
 
-function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresIssues, toxicityScoresComments) {
+function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresIssues, toxicityScoresComments, allUsers) {
   return __awaiter(this, void 0, void 0, function* () {
 
       try {
@@ -180,12 +183,13 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
           var creationTime = issue.created_at;  
           var creationDate = new Date(creationTime); 
 
+          allUsers.set(issueUser, creationTime);
           // TODO: remove true
           if (true || creationDate.getMonth() == queryDate.getMonth()) {
             console.log("Creation of issue is previous month, so analyzing now. Issue #: ", issueId);
 
             // measure toxicity here 
-            yield getToxicityScoresForIssue(client, owner, repo, issueUser, issueId, issueText, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer);
+            yield getToxicityScoresForIssue(client, owner, repo, issueUser, issueId, issueText, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer, allUsers);
           }
 
           // TODO: remove return 
@@ -202,9 +206,7 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
   });
 }
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+
 
 // TODO - clean input 
 //   [x] remove code blocks '''
@@ -272,7 +274,10 @@ function run() {
     var toxicityScoresIssues = new Map(); 
     var toxicityScoresComments = new Map(); 
 
-    yield getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresIssues, toxicityScoresComments);
+    var newUsers = new Map();
+    yield getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresIssues, toxicityScoresComments, newUsers);
+
+    console.log("NEW USERS:", allUsers); 
 
     var sample = "Implemented build step functionality  Eiffel json schema's cloned from github eiffel repo, topic-drop4 branch. Eiffel Schema Changes  for jsonSchema2pojo generation plugin \n### Added required properties JavaType ExtendedJavaType    Modified eiffel shcema's \n1. Changed time format \n2. Removed 's' from class names ending with that letter";
     console.log('cleaned sample: ', cleanText(sample));
@@ -290,6 +295,9 @@ function run() {
 
     // var currDate = new Date(); 
     //var currMonth = currDate.getMonth(); 
+
+            
+
     // generate report 
     var report_title = "<MONTH> project climate report for" + repo + "📊🐻⛄️🐛";
     fs.writeFile('climate_report.txt', report_title, (err) => { 
@@ -311,7 +319,7 @@ function run() {
             pass: password,
         }
       });
-      let info = transporter.sendMail({
+      let info = transport.sendMail({
         from: '"Pavitthra Pandurangan" <pavitthra.n.p@gmail.com>', // sender address
         to: "pavitthp@andrew.cmu.edu", // list of receivers
         subject: "Hello ✔", // Subject line\
