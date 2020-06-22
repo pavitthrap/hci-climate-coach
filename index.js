@@ -14,6 +14,8 @@ const core = require("@actions/core");
 const github = require("@actions/github");
 const removeMd = require('remove-markdown');
 const fs = require('fs');
+// const nodemailer = require("nodemailer");
+
 
 const { EOL } = require('os');
 const { parse } = require('fast-csv');
@@ -310,8 +312,8 @@ function run() {
         console.log("done processing data in end.")
       });
     
-    //stream.write(CSV_GITHUB_STRING);
-    //stream.end();
+    stream.write(CSV_STRING);
+    stream.end();
 
     console.log("done with stream, pre_data is:", pre_data); 
 
