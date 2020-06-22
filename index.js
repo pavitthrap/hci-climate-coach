@@ -287,17 +287,16 @@ function run() {
     if (numSamples > 0) {
       console.log("Proportion of comments exceeding toxicity threshold: ", numOverThreshold/numSamples); 
     }
-    
-    // console.log("about to process csv file");
-    // fs.createReadStream('data.csv')
-    //   .pipe(csv())
-    //   .on('data', (row) => {
-    //     console.log(row);
-    //   })
-    //   .on('end', () => {
-    //     console.log('CSV file successfully processed');
-    //   });
 
+    // generate report 
+    var report_title = "<MONTH> project climate report for <PROJECT NAME>";
+    fs.writeFile('climate_report.txt', report_title, (err) => { 
+      // In case of a error throw err. 
+      if (err) throw err; 
+    }) 
+    console.log("wrote to climate file...");
+    
+    // process csv data 
     pre_data = []
     const stream = parse({
       headers: headers => headers.map(h => h.toUpperCase()),
@@ -312,10 +311,8 @@ function run() {
         console.log("done processing data in end.")
       });
     
-    stream.write(CSV_STRING);
-    stream.end();
-
-    console.log("done with stream, pre_data is:", pre_data); 
+    //stream.write(CSV_STRING);
+    //stream.end();
 
 
     // TODO - maybe apply some filtering to the toxicity scores?
