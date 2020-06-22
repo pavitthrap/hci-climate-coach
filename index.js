@@ -14,7 +14,7 @@ const core = require("@actions/core");
 const github = require("@actions/github");
 const removeMd = require('remove-markdown');
 const fs = require('fs');
-// const nodemailer = require("nodemailer");
+const nodemailer = require("nodemailer");
 
 
 const { EOL } = require('os');
