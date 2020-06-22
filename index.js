@@ -305,7 +305,7 @@ function run() {
       const transport = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: "465",
-        secure: server_port == "465",
+        secure: true,
         auth: {
             user: username,
             pass: password,
