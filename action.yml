@@ -13,6 +13,12 @@ inputs:
     repo-owner:
         description: 'Owner of this repository.'
         required: true
+    username:
+      description: 'username of email.'
+      required: true
+    password:
+      description: 'password of email.'
+      required: true
 runs:
   using: 'node12'
   main: 'index.js'

@@ -311,7 +311,7 @@ function run() {
             pass: password,
         }
       });
-      let info = await transporter.sendMail({
+      let info = transporter.sendMail({
         from: '"Pavitthra Pandurangan" <pavitthra.n.p@gmail.com>', // sender address
         to: "pavitthp@andrew.cmu.edu", // list of receivers
         subject: "Hello ✔", // Subject line\
