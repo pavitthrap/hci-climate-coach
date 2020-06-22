@@ -288,14 +288,41 @@ function run() {
       console.log("Proportion of comments exceeding toxicity threshold: ", numOverThreshold/numSamples); 
     }
 
+    // var currDate = new Date(); 
+    //var currMonth = currDate.getMonth(); 
     // generate report 
-    var report_title = "<MONTH> project climate report for <PROJECT NAME>";
+    var report_title = "<MONTH> project climate report for" + repo + "📊🐻⛄️🐛";
     fs.writeFile('climate_report.txt', report_title, (err) => { 
       // In case of a error throw err. 
       if (err) throw err; 
     }) 
     console.log("wrote to climate file...");
-    
+
+    // send email 
+    const username = core.getInput("username", { required: true })
+    const password = core.getInput("password", { required: true })
+    try {
+      const transport = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: "465",
+        secure: server_port == "465",
+        auth: {
+            user: username,
+            pass: password,
+        }
+      });
+      let info = await transporter.sendMail({
+        from: '"Pavitthra Pandurangan" <pavitthra.n.p@gmail.com>', // sender address
+        to: "pavitthp@andrew.cmu.edu", // list of receivers
+        subject: "Hello ✔", // Subject line\
+        html: "<b>Hello world?</b>", // html body
+      });
+
+      console.log(info);
+    } catch (err) {
+      console.log(err);
+    }
+
     // process csv data 
     pre_data = []
     const stream = parse({
