@@ -114,7 +114,7 @@ function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issu
 
     console.log('getting comments...\n');
     try {
-      const {data: comments} = yield client.o({
+      const {data: comments} = yield client.issues.listComments({ 
           owner: owner,
           repo: repo,
           issue_number: issueID,
@@ -277,7 +277,8 @@ function run() {
     var newUsers = new Map();
     yield getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresIssues, toxicityScoresComments, newUsers);
 
-    console.log("NEW USERS:", allUsers); 
+    console.log("NEW USERS:", newUsers);
+    console.log("# of NEW USERS: ", newUsers.size); 
 
     var sample = "Implemented build step functionality  Eiffel json schema's cloned from github eiffel repo, topic-drop4 branch. Eiffel Schema Changes  for jsonSchema2pojo generation plugin \n### Added required properties JavaType ExtendedJavaType    Modified eiffel shcema's \n1. Changed time format \n2. Removed 's' from class names ending with that letter";
     console.log('cleaned sample: ', cleanText(sample));
