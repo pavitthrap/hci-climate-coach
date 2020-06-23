@@ -216,12 +216,20 @@ function isFirstPost(client, owner, repo, allPosters, page = 1) {
   return __awaiter(this, void 0, void 0, function* () {
       // Provide console output if we loop for a while.
       console.log('Checking issues page ', page);
-      const { status, data: issues } = yield client.issues.list({
-          per_page: 100,
-          page: page,
-          state: 'all'
-      });
-      console.log("num issues:", issues.length);
+      // const { status, data: issues } = yield client.issues.list({
+      //     per_page: 100,
+      //     page: page,
+      //     state: 'all'
+      // });
+      const { status, data: pulls } = yield client.pulls.list({
+        owner: owner,
+        repo: repo,
+        per_page: 100,
+        page: page,
+        state: 'all'
+    });
+      console.log("num issues:", pulls.length);
+      return; 
       if (status !== 200) {
           throw new Error(`Received unexpected API status code ${status}`);
       }
@@ -304,7 +312,7 @@ function processAllData(commentAnalyzer, pre_data) {
 
 function generateEmailContents(repo, numOverThreshold, numSamples) {
   var queryDate = getBeginningOfPrevMonth(); 
-  const month = date.toLocaleString('default', { month: 'long' });
+  const month = queryDate.toLocaleString('default', { month: 'long' });
   console.log("PREV MONTH in TEXT!!", month); 
 
   var title = "<h1>" + month + "project climate report for " + repo + "📊🐻⛄️🐛 </h1>"; 
@@ -314,6 +322,9 @@ function generateEmailContents(repo, numOverThreshold, numSamples) {
   var uniqueContributors = 3; 
 
   section_one += "<ul> <li>Number of new contributors this month: " + "</li> <li>Number of unique commenters / contributors this month: " + uniqueContributors +"</li><li>Percent “toxic” comments: "+ numOverThreshold/numSamples + "</li>  <li>Number of “toxic” comments: "+ numOverThreshold + "</li> </ul>"
+  var section_two = "<h2>🔥 Problem convos </h2 <p> Here are some conversations you should probably check in on </p> ";
+  var section_three = "<h2>🐛 How you compare to other projects</h2> <p> For projects your size (X-Y contributors)*, you are in the…. </p>"
+  
   console.log("email contents:", title + section_one)
   return title + section_one; 
 }
