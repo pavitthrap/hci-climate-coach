@@ -166,7 +166,8 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
         const { status, data: issues } = yield client.issues.listForRepo({
             owner: owner,
             repo: repo,
-            since: queryDate
+            since: queryDate, 
+            state: 'all'
         });
       
         if (status !== 200) {
@@ -216,20 +217,15 @@ function isFirstPost(client, owner, repo, allPosters, page = 1) {
   return __awaiter(this, void 0, void 0, function* () {
       // Provide console output if we loop for a while.
       console.log('Checking issues page ', page);
-      // const { status, data: issues } = yield client.issues.list({
-      //     per_page: 100,
-      //     page: page,
-      //     state: 'all'
-      // });
-      const { status, data: pulls } = yield client.pulls.list({
+      const { status, data: issues } = yield client.issues.listForRepo({
         owner: owner,
         repo: repo,
         per_page: 100,
         page: page,
         state: 'all'
-    });
-      console.log("num issues:", pulls.length);
-      return; 
+      });
+    
+      console.log("num issues:", issues.length);
       if (status !== 200) {
           throw new Error(`Received unexpected API status code ${status}`);
       }
@@ -390,6 +386,7 @@ function run() {
     sgMail
     .send(msg)
     .then(() => {
+      console.log("IN THEN.")
     }, error => {
       console.error(error);
   
@@ -398,6 +395,7 @@ function run() {
       }
     });
 
+    console.log("After email sent.")
 
     // process csv data 
     pre_data = []
