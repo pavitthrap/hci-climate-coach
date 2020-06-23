@@ -319,8 +319,8 @@ function run() {
     console.log("\nABOUT TO SEND MAIL....");
     sgMail.setApiKey(sendgrid_key);
     const msg = {
-      to: 'test@example.com',
-      from: 'test@example.com',
+      to: 'paviusa@yahoo.com',
+      from: 'hci.demo.pavi@gmail.com',
       subject: 'Sending with Twilio SendGrid is Fun',
       text: 'and easy to do anywhere, even with Node.js',
       html: '<strong>and easy to do anywhere, even with Node.js</strong>',
