@@ -215,19 +215,18 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
 function isFirstPost(client, owner, repo, allPosters, page = 1) {
   return __awaiter(this, void 0, void 0, function* () {
       // Provide console output if we loop for a while.
-      console.log('Checking pulls page ', page);
+      console.log('Checking issues page ', page);
       const { status, data: issues } = yield client.issues.list({
-          owner: owner,
-          repo: repo,
           per_page: 100,
           page: page,
           state: 'all'
       });
+      console.log("num issues:", issues.length);
       if (status !== 200) {
           throw new Error(`Received unexpected API status code ${status}`);
       }
       if (issues.length === 0) {
-          console.log("Finished checking all pulls, so will return the remaining new posters.")
+          console.log("Finished checking all issues, so will return the remaining new posters.")
           return allPosters;
       }
       for (const issue of issues) {
@@ -308,9 +307,15 @@ function generateEmailContents(repo, numOverThreshold, numSamples) {
   const month = date.toLocaleString('default', { month: 'long' });
   console.log("PREV MONTH in TEXT!!", month); 
 
-  var title = "<h1>" + month + "project climate report for " + repo + "📊🐻⛄️🐛 </h1>"
-  console.log("email contents:", title)
-  return title; 
+  var title = "<h1>" + month + "project climate report for " + repo + "📊🐻⛄️🐛 </h1>"; 
+  var section_one = "<h2> 🐻 Your project stats <h2>"; 
+  
+  var newContributors = 3; 
+  var uniqueContributors = 3; 
+
+  section_one += "<ul> <li>Number of new contributors this month: " + "</li> <li>Number of unique commenters / contributors this month: " + uniqueContributors +"</li><li>Percent “toxic” comments: "+ numOverThreshold/numSamples + "</li>  <li>Number of “toxic” comments: "+ numOverThreshold + "</li> </ul>"
+  console.log("email contents:", title + section_one)
+  return title + section_one; 
 }
 
 function run() {
@@ -352,11 +357,7 @@ function run() {
       console.log("Proportion of comments exceeding toxicity threshold: ", numOverThreshold/numSamples); 
     }
 
-    // var currDate = new Date(); 
-    //var currMonth = currDate.getMonth(); 
-
     // TODO
-    // - make new email w/o 2fa, get new users in past month 
     // - filter github-actions[bot] out of user map  
     // send email 
     const username = core.getInput("username", { required: true })
