@@ -186,7 +186,7 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
           var creationDate = new Date(creationTime); 
 
           allUsers.set(issueUser, creationTime);
-          allPosters.set(user, creationDate);
+          allPosters.set(issueUser, creationDate);
 
           // TODO: remove true
           if (true || creationDate.getMonth() == queryDate.getMonth()) {
@@ -303,6 +303,16 @@ function processAllData(commentAnalyzer, pre_data) {
 }
 
 
+function generateEmailContents(repo, numOverThreshold, numSamples) {
+  var queryDate = getBeginningOfPrevMonth(); 
+  const month = date.toLocaleString('default', { month: 'long' });
+  console.log("PREV MONTH in TEXT!!", month); 
+
+  var title = "<h1>" + month + "project climate report for " + repo + "📊🐻⛄️🐛 </h1>"
+  console.log("email contents:", title)
+  return title; 
+}
+
 function run() {
   return __awaiter(this, void 0, void 0, function* () {
     const {google} = require("googleapis");
@@ -345,16 +355,6 @@ function run() {
     // var currDate = new Date(); 
     //var currMonth = currDate.getMonth(); 
 
-            
-
-    // generate report 
-    var report_title = "<MONTH> project climate report for" + repo + "📊🐻⛄️🐛";
-    fs.writeFile('climate_report.txt', report_title, (err) => { 
-      // In case of a error throw err. 
-      if (err) throw err; 
-    }) 
-    console.log("wrote to climate file...");
-
     // TODO
     // - make new email w/o 2fa, get new users in past month 
     // - filter github-actions[bot] out of user map  
@@ -363,6 +363,8 @@ function run() {
     const password = core.getInput("password", { required: true })
     const sendgrid_key = core.getInput("send-grid-key", { required: true })
 
+    var body = generateEmailContents(repo, numOverThreshold, numSamples);
+
     console.log("\nABOUT TO SEND MAIL....");
     sgMail.setApiKey(sendgrid_key);
     const msg = {
@@ -370,7 +372,7 @@ function run() {
       from: 'hci.demo.pavi@gmail.com',
       subject: 'Sending with Twilio SendGrid is Fun',
       text: 'and easy to do anywhere, even with Node.js',
-      html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+      html: body,
     };
 
     sgMail
