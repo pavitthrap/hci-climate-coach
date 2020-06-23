@@ -329,7 +329,7 @@ function run() {
     sgMail
     .send(msg)
     .then(() => {
-      console.log("in the then statement...")
+      console.log("in the then statement./..")
     }, error => {
       console.error(error);
   
