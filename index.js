@@ -122,6 +122,7 @@ function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issu
       });
     
       for (var comment of comments) {
+        console.log(comment);
         var toxicity = yield analyzeToxicity(commentAnalyzer, comment.body);
         var user = comment.user.login;
         var cleaned = cleanText(comment.body);
@@ -183,6 +184,7 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
           var issueUser = issue.user.login;
           var issueText = issue.title + " " + issue.body; 
           var issueId = issue.number;
+          var issueLink = issue.html_url; 
           var creationTime = issue.created_at;  
           var creationDate = new Date(creationTime); 
 
@@ -319,10 +321,13 @@ function generateEmailContents(repo, numOverThreshold, numSamples) {
 
   section_one += "<ul> <li>Number of new contributors this month: " + "</li> <li>Number of unique commenters / contributors this month: " + uniqueContributors +"</li><li>Percent “toxic” comments: "+ numOverThreshold/numSamples + "</li>  <li>Number of “toxic” comments: "+ numOverThreshold + "</li> </ul>"
   var section_two = "<h2>🔥 Problem convos </h2 <p> Here are some conversations you should probably check in on </p> ";
-  var section_three = "<h2>🐛 How you compare to other projects</h2> <p> For projects your size (X-Y contributors)*, you are in the…. </p>"
+  var section_three = "<h2>🐛 How you compare to other projects</h2> <p> For projects your size (X-Y contributors)*, you are in the…. </p>"; 
+  section_three += "<ul> <li>5th percentile for toxic comments (min = X, max = Y, median = Z) </li> </ul>";
+
+  var body = title + section_one + section_two + section_three; 
   
-  console.log("email contents:", title + section_one)
-  return title + section_one; 
+  console.log("email contents:", body)
+  return body; 
 }
 
 function run() {
