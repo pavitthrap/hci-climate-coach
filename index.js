@@ -14,7 +14,8 @@ const core = require("@actions/core");
 const github = require("@actions/github");
 const removeMd = require('remove-markdown');
 const fs = require('fs');
-const nodemailer = require("nodemailer");
+// const nodemailer = require("nodemailer");
+const sgMail = require('@sendgrid/mail');
 
 
 const { EOL } = require('os');
@@ -307,30 +308,54 @@ function run() {
     }) 
     console.log("wrote to climate file...");
 
+    // TODO
+    // - make new email w/o 2fa, get new users in past month 
+    // - filter github-actions[bot] out of user map  
     // send email 
     const username = core.getInput("username", { required: true })
     const password = core.getInput("password", { required: true })
-    try {
-      const transport = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: "465",
-        secure: true,
-        auth: {
-            user: username,
-            pass: password,
-        }
-      });
-      let info = transport.sendMail({
-        from: '"Pavitthra Pandurangan" <pavitthra.n.p@gmail.com>', // sender address
-        to: "pavitthp@andrew.cmu.edu", // list of receivers
-        subject: "Hello ✔", // Subject line\
-        html: "<b>Hello world?</b>", // html body
-      });
+    const sendgrid_key = core.getInput("send-grid-key", { required: true })
 
-      console.log(info);
-    } catch (err) {
-      console.log(err);
-    }
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    const msg = {
+      to: 'paviusa@yahoo.com',
+      from: 'test@example.com',
+      subject: 'Sending with Twilio SendGrid is Fun',
+      text: 'and easy to do anywhere, even with Node.js',
+      html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+    };
+
+    sgMail
+    .send(msg)
+    .then(() => {}, error => {
+      console.error(error);
+  
+      if (error.response) {
+        console.error(error.response.body)
+      }
+    });
+
+    // try {
+    //   const transport = nodemailer.createTransport({
+    //     host: "smtp.gmail.com",
+    //     port: "465",
+    //     secure: true,
+    //     auth: {
+    //         user: username,
+    //         pass: password,
+    //     }
+    //   });
+    //   let info = transport.sendMail({
+    //     from: '"Pavitthra Pandurangan" <pavitthra.n.p@gmail.com>', // sender address
+    //     to: "pavitthp@andrew.cmu.edu", // list of receivers
+    //     subject: "Hello ✔", // Subject line\
+    //     html: "<b>Hello world?</b>", // html body
+    //   });
+
+    //   console.log(info);
+    // } catch (err) {
+    //   console.log(err);
+    // }
 
     // process csv data 
     pre_data = []
