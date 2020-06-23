@@ -316,6 +316,7 @@ function run() {
     const password = core.getInput("password", { required: true })
     const sendgrid_key = core.getInput("send-grid-key", { required: true })
 
+    console.log("\nABOUT TO SEND MAIL....");
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
     const msg = {
       to: 'test@example.com',
