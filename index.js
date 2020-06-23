@@ -74,7 +74,7 @@ function analyzeToxicity(commentAnalyzer, text) {
 * @param {string}
 * @param {Map}
 */
-function updateToxicityInMap(toxicity, user, ID, text, toxicityScores) {
+function updateToxicityInMap(toxicity, user, ID, text, url, toxicityScores) {
   if (toxicity < toxicityThreshold) {
     console.log("Not recording comment/issue since the toxicity score is below the threshold.")
     numUnderThreshold += 1; 
@@ -87,7 +87,7 @@ function updateToxicityInMap(toxicity, user, ID, text, toxicityScores) {
     toxicityScores.set(user, new Map()); 
   }
   var userToxicityMap = toxicityScores.get(user);
-  userToxicityMap.set(ID, [toxicity, text]);
+  userToxicityMap.set(ID, [toxicity, text, url]);
 }
 
 // TODO -> use this
@@ -106,12 +106,12 @@ function cleanText(text) {
   return plainText; 
 }
 
-function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issueText, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer, allUsers) {
+function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issueText, issueUrl, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer, allUsers) {
   return __awaiter(this, void 0, void 0, function* () {
     
     console.log("analyzing issue text... ");
     var toxicity = yield analyzeToxicity(commentAnalyzer, issueText);
-    updateToxicityInMap(toxicity, issueUser, issueID, issueText, toxicityScoresIssues)
+    updateToxicityInMap(toxicity, issueUser, issueID, issueText, issueUrl, toxicityScoresIssues)
 
     console.log('getting comments...\n');
     try {
@@ -122,11 +122,10 @@ function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issu
       });
     
       for (var comment of comments) {
-        console.log(comment);
         var toxicity = yield analyzeToxicity(commentAnalyzer, comment.body);
         var user = comment.user.login;
         var cleaned = cleanText(comment.body);
-        updateToxicityInMap(toxicity, user, comment.id, comment.body, toxicityScoresComments)
+        updateToxicityInMap(toxicity, user, comment.id, comment.body, comment.html_url, toxicityScoresComments)
         var cleanedToxicity = yield analyzeToxicity(commentAnalyzer, cleaned);
         console.log("COMMENT TEXT: ", comment.body, " , user: ", user, ", comment Toxicity: ", toxicity);
         console.log("CLEAN COMMENT TEXT: ", cleaned, ", comment Toxicity: ", cleanedToxicity);
@@ -184,7 +183,7 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
           var issueUser = issue.user.login;
           var issueText = issue.title + " " + issue.body; 
           var issueId = issue.number;
-          var issueLink = issue.html_url; 
+          var issueUrl = issue.html_url; 
           var creationTime = issue.created_at;  
           var creationDate = new Date(creationTime); 
 
@@ -196,7 +195,7 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
             console.log("Creation of issue is previous month, so analyzing now. Issue #: ", issueId);
 
             // measure toxicity here 
-            yield getToxicityScoresForIssue(client, owner, repo, issueUser, issueId, issueText, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer, allUsers);
+            yield getToxicityScoresForIssue(client, owner, repo, issueUser, issueId, issueText, issueUrl, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer, allUsers);
           }
 
           // TODO: remove return 
@@ -381,7 +380,7 @@ function run() {
     console.log("\nABOUT TO SEND MAIL....");
     sgMail.setApiKey(sendgrid_key);
     const msg = {
-      to: 'paviusa@yahoo.com',
+      to: 'paviusa23@gmail.com',
       from: 'hci.demo.pavi@gmail.com',
       subject: 'Sending with Twilio SendGrid is Fun',
       text: 'and easy to do anywhere, even with Node.js',
