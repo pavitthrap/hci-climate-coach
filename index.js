@@ -309,8 +309,11 @@ function processAllData(commentAnalyzer, pre_data) {
 
 function getUrls(toxicityMap, urls){
   for (var user in toxicityMap){
+    console.log("user:", user)
     for (var commentID in toxicityMap[user]) {
       var url = toxicityMap[user][commentID][2];
+      console.log("in comment:", url)
+
       urls.push(url); 
     }
   } 
@@ -322,6 +325,8 @@ function generateEmailContents(repo, numOverThreshold, numSamples, toxicityScore
   getUrls(toxicityScoresComments, urls);
   getUrls(toxicityScoresIssues, urls); 
   console.log("problem urls: ", urls);
+
+  var percentToxic = numOverThreshold/numSamples; 
   // get month name 
   var prevMonthBeginning = getBeginningOfPrevMonth(); 
   const month = prevMonthBeginning.toLocaleString('default', { month: 'long' });
@@ -329,7 +334,7 @@ function generateEmailContents(repo, numOverThreshold, numSamples, toxicityScore
   var title = "<h1>" + month + " project climate report for " + repo + "📊🐻⛄️🐛 </h1>"; 
   var section_one = "<h2> 🐻 Your project stats <h2>"; 
   
-  section_one += "<p> <ul> <li>Number of new contributors this month: " + newPosters.size + "</li> <li>Number of unique commenters / contributors this month: " + allUsers.size +"</li><li>Percent “toxic” comments: "+ numOverThreshold/numSamples + "</li>  <li>Number of “toxic” comments: "+ numOverThreshold + "</li> </ul> </p>"
+  section_one += "<p> <ul> <li>Number of new contributors this month: " + newPosters.size + "</li> <li>Number of unique commenters / contributors this month: " + allUsers.size +"</li><li>Percent “toxic” comments: "+ percentToxic.toFixed(3) + "</li>  <li>Number of “toxic” comments: "+ numOverThreshold + "</li> </ul> </p>"
   var body = title + section_one; 
   if (urls.length > 0) {
     var section_two = "<h2>🔥 Problem convos </h2 <p> Here are some conversations you should probably check in on  <ul>";
