@@ -310,10 +310,10 @@ function processAllData(commentAnalyzer, pre_data) {
 function getUrls(toxicityMap, urls){
   console.log("in getUrls. ", toxicityMap.size); 
   for (var user of toxicityMap.keys()){
-    console.log("user:", user, toxicityMap[user])
-    for (var commentID of toxicityMap[user].keys()) {
-      console.log("comment:", commentID)
-      var url = toxicityMap[user][commentID][2];
+    console.log("user:", user, toxicityMap.get(user))
+    for (var commentID of toxicityMap.get(user).keys()) {
+      console.log("comment:", commentID, toxicityMap.get(user).get(commentID))
+      var url = toxicityMap.get(user).get(commentID)[2];
       console.log("in comment:", url)
 
       urls.push(url); 
