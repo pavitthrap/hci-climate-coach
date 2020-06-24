@@ -416,17 +416,17 @@ function run() {
       html: body,
     };
 
-    // sgMail
-    // .send(msg)
-    // .then(() => {
-    //   console.log("IN THEN.")
-    // }, error => {
-    //   console.error(error);
+    sgMail
+    .send(msg)
+    .then(() => {
+      console.log("IN THEN.")
+    }, error => {
+      console.error(error);
   
-    //   if (error.response) {
-    //     console.error(error.response.body)
-    //   }
-    // });
+      if (error.response) {
+        console.error(error.response.body)
+      }
+    });
 
     console.log("After email sent.")
 
