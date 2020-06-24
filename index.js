@@ -307,23 +307,42 @@ function processAllData(commentAnalyzer, pre_data) {
 }
 
 
-function generateEmailContents(repo, numOverThreshold, numSamples) {
-  var queryDate = getBeginningOfPrevMonth(); 
-  const month = queryDate.toLocaleString('default', { month: 'long' });
-  console.log("PREV MONTH in TEXT!!", month); 
+function getUrls(toxicityMap){
+  var urls = [];
+  for (var user in toxicityMap){
+    for (var commentID in toxicityMap[user]) {
+      var url = toxicityMap[user][commentID][2];
+      urls.push(url); 
+    }
+  } 
+  return urls; 
+}
 
-  var title = "<h1>" + month + "project climate report for " + repo + "📊🐻⛄️🐛 </h1>"; 
+function generateEmailContents(repo, numOverThreshold, numSamples, toxicityScoresIssues, toxicityScoresComments, newPosters, allUsers) {
+  // get urls of toxic comments 
+  var urls = []; 
+  urls.concat(getUrls(toxicityScoresComments), getUrls(toxicityScoresIssues)); 
+  console.log("problem urls: ", urls);
+  // get month name 
+  var prevMonthBeginning = getBeginningOfPrevMonth(); 
+  const month = prevMonthBeginning.toLocaleString('default', { month: 'long' });
+
+  var title = "<h1>" + month + " project climate report for " + repo + "📊🐻⛄️🐛 </h1>"; 
   var section_one = "<h2> 🐻 Your project stats <h2>"; 
   
-  var newContributors = 3; 
-  var uniqueContributors = 3; 
-
-  section_one += "<ul> <li>Number of new contributors this month: " + "</li> <li>Number of unique commenters / contributors this month: " + uniqueContributors +"</li><li>Percent “toxic” comments: "+ numOverThreshold/numSamples + "</li>  <li>Number of “toxic” comments: "+ numOverThreshold + "</li> </ul>"
-  var section_two = "<h2>🔥 Problem convos </h2 <p> Here are some conversations you should probably check in on </p> ";
+  section_one += "<p> <ul> <li>Number of new contributors this month: " + newPosters.size + "</li> <li>Number of unique commenters / contributors this month: " + allUsers.size +"</li><li>Percent “toxic” comments: "+ numOverThreshold/numSamples + "</li>  <li>Number of “toxic” comments: "+ numOverThreshold + "</li> </ul> </p>"
+  var body = title + section_one; 
+  if (urls.length > 0) {
+    var section_two = "<h2>🔥 Problem convos </h2 <p> Here are some conversations you should probably check in on  <ul>";
+    for (var i = 0; i < urls.length; i ++ ){
+      section_two += "<li>" + urls[i] + "</li>";
+    }
+    section_two += "</ul> </p>"
+    body += section_two; 
+  }
   var section_three = "<h2>🐛 How you compare to other projects</h2> <p> For projects your size (X-Y contributors)*, you are in the…. </p>"; 
   section_three += "<ul> <li>5th percentile for toxic comments (min = X, max = Y, median = Z) </li> </ul>";
-
-  var body = title + section_one + section_two + section_three; 
+  body += section_three; 
   
   console.log("email contents:", body)
   return body; 
@@ -351,8 +370,9 @@ function run() {
     console.log("# of USERS: ", allUsers.size); 
 
     console.log("All POSTERS before: ", allPosters); 
-    yield isFirstPost(client, owner, repo, allPosters); 
-    console.log("All POSTERS after: ", allPosters); 
+    var newPosters = allPosters; 
+    yield isFirstPost(client, owner, repo, newPosters); 
+    console.log("All POSTERS after: ", allPosters, "NEW POSTERS after: ", newPosters); 
 
     var sample = "Implemented build step functionality  Eiffel json schema's cloned from github eiffel repo, topic-drop4 branch. Eiffel Schema Changes  for jsonSchema2pojo generation plugin \n### Added required properties JavaType ExtendedJavaType    Modified eiffel shcema's \n1. Changed time format \n2. Removed 's' from class names ending with that letter";
     console.log('cleaned sample: ', cleanText(sample));
@@ -375,29 +395,29 @@ function run() {
     const password = core.getInput("password", { required: true })
     const sendgrid_key = core.getInput("send-grid-key", { required: true })
 
-    var body = generateEmailContents(repo, numOverThreshold, numSamples);
+    var body = generateEmailContents(repo, numOverThreshold, numSamples, toxicityScoresIssues, toxicityScoresComments, newPosters, allUsers);
 
     console.log("\nABOUT TO SEND MAIL....");
     sgMail.setApiKey(sendgrid_key);
     const msg = {
       to: 'paviusa23@gmail.com',
       from: 'hci.demo.pavi@gmail.com',
-      subject: 'Sending with Twilio SendGrid is Fun',
+      subject: 'Project Report',
       text: 'and easy to do anywhere, even with Node.js',
       html: body,
     };
 
-    sgMail
-    .send(msg)
-    .then(() => {
-      console.log("IN THEN.")
-    }, error => {
-      console.error(error);
+    // sgMail
+    // .send(msg)
+    // .then(() => {
+    //   console.log("IN THEN.")
+    // }, error => {
+    //   console.error(error);
   
-      if (error.response) {
-        console.error(error.response.body)
-      }
-    });
+    //   if (error.response) {
+    //     console.error(error.response.body)
+    //   }
+    // });
 
     console.log("After email sent.")
 
