@@ -307,21 +307,20 @@ function processAllData(commentAnalyzer, pre_data) {
 }
 
 
-function getUrls(toxicityMap){
-  var urls = [];
+function getUrls(toxicityMap, urls){
   for (var user in toxicityMap){
     for (var commentID in toxicityMap[user]) {
       var url = toxicityMap[user][commentID][2];
       urls.push(url); 
     }
   } 
-  return urls; 
 }
 
 function generateEmailContents(repo, numOverThreshold, numSamples, toxicityScoresIssues, toxicityScoresComments, newPosters, allUsers) {
   // get urls of toxic comments 
   var urls = []; 
-  urls.concat(getUrls(toxicityScoresComments), getUrls(toxicityScoresIssues)); 
+  getUrls(toxicityScoresComments, urls);
+  getUrls(toxicityScoresIssues, urls); 
   console.log("problem urls: ", urls);
   // get month name 
   var prevMonthBeginning = getBeginningOfPrevMonth(); 
