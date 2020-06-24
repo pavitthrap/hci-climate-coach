@@ -310,9 +310,10 @@ function processAllData(commentAnalyzer, pre_data) {
 function getUrls(toxicityMap, urls){
   console.log("in getUrls. ", toxicityMap.size); 
   for (var user of toxicityMap.keys()){
-    console.log("user:", user)
-    for (var v of toxicityMap[user].values()) {
-      var url = v[2];
+    console.log("user:", user, toxicityMap[user])
+    for (var commentID of toxicityMap[user].keys()) {
+      console.log("comment:", commentID)
+      var url = toxicityMap[user][commentID][2];
       console.log("in comment:", url)
 
       urls.push(url); 
@@ -321,36 +322,39 @@ function getUrls(toxicityMap, urls){
 }
 
 function generateEmailContents(repo, numOverThreshold, numSamples, toxicityScoresIssues, toxicityScoresComments, newPosters, allUsers) {
-  // get urls of toxic comments 
-  var urls = []; 
-  getUrls(toxicityScoresComments, urls);
-  getUrls(toxicityScoresIssues, urls); 
-  console.log("problem urls: ", urls);
+  return __awaiter(this, void 0, void 0, function* () {
 
-  var percentToxic = numOverThreshold/numSamples; 
-  // get month name 
-  var prevMonthBeginning = getBeginningOfPrevMonth(); 
-  const month = prevMonthBeginning.toLocaleString('default', { month: 'long' });
+    // get urls of toxic comments 
+    var urls = []; 
+    getUrls(toxicityScoresComments, urls);
+    getUrls(toxicityScoresIssues, urls); 
+    console.log("problem urls: ", urls);
 
-  var title = "<h1>" + month + " project climate report for " + repo + "📊🐻⛄️🐛 </h1>"; 
-  var section_one = "<h2> 🐻 Your project stats <h2>"; 
-  
-  section_one += "<p> <ul> <li>Number of new contributors this month: " + newPosters.size + "</li> <li>Number of unique commenters / contributors this month: " + allUsers.size +"</li><li>Percent “toxic” comments: "+ percentToxic.toFixed(3) + "</li>  <li>Number of “toxic” comments: "+ numOverThreshold + "</li> </ul> </p>"
-  var body = title + section_one; 
-  if (urls.length > 0) {
-    var section_two = "<h2>🔥 Problem convos </h2 <p> Here are some conversations you should probably check in on  <ul>";
-    for (var i = 0; i < urls.length; i ++ ){
-      section_two += "<li>" + urls[i] + "</li>";
+    var percentToxic = numOverThreshold/numSamples; 
+    // get month name 
+    var prevMonthBeginning = getBeginningOfPrevMonth(); 
+    const month = prevMonthBeginning.toLocaleString('default', { month: 'long' });
+
+    var title = "<h1>" + month + " project climate report for " + repo + "📊🐻⛄️🐛 </h1>"; 
+    var section_one = "<h2> 🐻 Your project stats <h2>"; 
+    
+    section_one += "<p> <ul> <li>Number of new contributors this month: " + newPosters.size + "</li> <li>Number of unique commenters / contributors this month: " + allUsers.size +"</li><li>Percent “toxic” comments: "+ percentToxic.toFixed(3) + "</li>  <li>Number of “toxic” comments: "+ numOverThreshold + "</li> </ul> </p>"
+    var body = title + section_one; 
+    if (urls.length > 0) {
+      var section_two = "<h2>🔥 Problem convos </h2 <p> Here are some conversations you should probably check in on  <ul>";
+      for (var i = 0; i < urls.length; i ++ ){
+        section_two += "<li>" + urls[i] + "</li>";
+      }
+      section_two += "</ul> </p>"
+      body += section_two; 
     }
-    section_two += "</ul> </p>"
-    body += section_two; 
-  }
-  var section_three = "<h2>🐛 How you compare to other projects</h2> <p> For projects your size (X-Y contributors)*, you are in the…. </p>"; 
-  section_three += "<ul> <li>5th percentile for toxic comments (min = X, max = Y, median = Z) </li> </ul>";
-  body += section_three; 
-  
-  console.log("email contents:", body)
-  return body; 
+    var section_three = "<h2>🐛 How you compare to other projects</h2> <p> For projects your size (X-Y contributors)*, you are in the…. </p>"; 
+    section_three += "<ul> <li>5th percentile for toxic comments (min = X, max = Y, median = Z) </li> </ul>";
+    body += section_three; 
+    
+    console.log("email contents:", body)
+    return body; 
+  }); 
 }
 
 function run() {
@@ -400,7 +404,7 @@ function run() {
     const password = core.getInput("password", { required: true })
     const sendgrid_key = core.getInput("send-grid-key", { required: true })
 
-    var body = generateEmailContents(repo, numOverThreshold, numSamples, toxicityScoresIssues, toxicityScoresComments, newPosters, allUsers);
+    var body = yield generateEmailContents(repo, numOverThreshold, numSamples, toxicityScoresIssues, toxicityScoresComments, newPosters, allUsers);
 
     console.log("\nABOUT TO SEND MAIL....");
     sgMail.setApiKey(sendgrid_key);
