@@ -321,6 +321,8 @@ function getUrls(toxicityMap, urls){
   } 
 }
 
+// TODO 
+// - documentation for both responsiveness & climate coach 
 function generateEmailContents(repo, numOverThreshold, numSamples, toxicityScoresIssues, toxicityScoresComments, newPosters, allUsers) {
   return __awaiter(this, void 0, void 0, function* () {
 
@@ -330,18 +332,20 @@ function generateEmailContents(repo, numOverThreshold, numSamples, toxicityScore
     getUrls(toxicityScoresIssues, urls); 
     console.log("problem urls: ", urls);
 
-    var percentToxic = numOverThreshold/numSamples; 
+    var percentToxic = (numOverThreshold/numSamples)*100; 
     // get month name 
     var prevMonthBeginning = getBeginningOfPrevMonth(); 
     const month = prevMonthBeginning.toLocaleString('default', { month: 'long' });
 
     var title = "<h1>" + month + " project climate report for " + repo + "📊🐻⛄️🐛 </h1>"; 
-    var section_one = "<h2> 🐻 Your project stats <h2>"; 
+    var section_one = "<h2> 🐻 Your project stats </h2>"; 
     
-    section_one += "<p> <ul> <li>Number of new contributors this month: " + newPosters.size + "</li> <li>Number of unique commenters / contributors this month: " + allUsers.size +"</li><li>Percent “toxic” comments: "+ percentToxic.toFixed(3) + "</li>  <li>Number of “toxic” comments: "+ numOverThreshold + "</li> </ul> </p>"
+    section_one += "<p> <ul> <li>Number of new contributors this month: " + newPosters.size + "</li> <li>Number of unique commenters / contributors this month: " + allUsers.size +"</li><li>Percent “toxic” posts: "+ percentToxic.toFixed(3) + "</li>  <li>Number of “toxic” posts: "+ numOverThreshold + "</li> </ul> </p>"
+    section_one += "<p><small>Toxic posts are those that score higher than a threshold of 0.5 for the TOXICITY attribute, as determined by <a href='https://www.perspectiveapi.com/'> Google's Perspective API</a>. </small></p>"
+    
     var body = title + section_one; 
     if (urls.length > 0) {
-      var section_two = "<h2>🔥 Problem convos </h2 <p> Here are some conversations you should probably check in on  <ul>";
+      var section_two = "<h2>🔥 Problem convos </h2> <p> Here are some conversations you should probably check in on  <ul>";
       for (var i = 0; i < urls.length; i ++ ){
         section_two += "<li>" + urls[i] + "</li>";
       }
@@ -416,17 +420,17 @@ function run() {
       html: body,
     };
 
-    sgMail
-    .send(msg)
-    .then(() => {
-      console.log("IN THEN.")
-    }, error => {
-      console.error(error);
+    // sgMail
+    // .send(msg)
+    // .then(() => {
+    //   console.log("IN THEN.")
+    // }, error => {
+    //   console.error(error);
   
-      if (error.response) {
-        console.error(error.response.body)
-      }
-    });
+    //   if (error.response) {
+    //     console.error(error.response.body)
+    //   }
+    // });
 
     console.log("After email sent.")
 
