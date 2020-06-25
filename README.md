@@ -27,18 +27,18 @@ jobs:
 
 
 # Example message: 
-> # May project climate report for hci-demo📊🐻⛄️🐛
-> ## 🐻 Your project stats
-- Number of new contributors this month: 0
-- Number of unique commenters / contributors this month: 2
-- Percent “toxic” comments: 0.167
-- Number of “toxic” comments: 1
-## 🔥 Problem convos
-Here are some conversations you should probably check in on
-- https://github.com/pavitthrap/hci-demo/issues/219#issuecomment-634906552
-## 🐛 How you compare to other projects
-For projects your size (X-Y contributors)*, you are in the….
-- 5th percentile for toxic comments (min = X, max = Y, median = Z)
+> ## May project climate report for hci-demo📊🐻⛄️🐛
+> ### 🐻 Your project stats
+> - Number of new contributors this month: 0
+> - Number of unique commenters / contributors this month: 2
+> - Percent “toxic” comments: 0.167
+> - Number of “toxic” comments: 1
+> ### 🔥 Problem convos
+> Here are some conversations you should probably check in on
+> - https://github.com/pavitthrap/hci-demo/issues/219#issuecomment-634906552
+> ### 🐛 How you compare to other projects
+> For projects your size (X-Y contributors)*, you are in the….
+> - 5th percentile for toxic comments (min = X, max = Y, median = Z)
 
 # Implementation Notes 
 - This action is under the expectation it will be run monthly. When it is run, it collects the stats for the previous month. 
