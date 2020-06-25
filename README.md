@@ -28,7 +28,7 @@ jobs:
 
 # Example message: 
 > # May project climate report for hci-demo📊🐻⛄️🐛
-## 🐻 Your project stats
+> ## 🐻 Your project stats
 - Number of new contributors this month: 0
 - Number of unique commenters / contributors this month: 2
 - Percent “toxic” comments: 0.167
