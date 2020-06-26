@@ -106,7 +106,15 @@ function cleanText(text) {
   return plainText; 
 }
 
-function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issueText, issueUrl, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer, allUsers) {
+// API location for listing and creating reactions.
+
+//octokit.pulls.listReviewComments({
+//  owner,
+//  repo,
+//  pull_number,
+// });
+
+function getToxicityScoresForIssue(client, owner, repo, isPull, issueUser, issueID, issueText, issueUrl, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer, allUsers) {
   return __awaiter(this, void 0, void 0, function* () {
     
     console.log("analyzing issue text... ");
@@ -131,8 +139,16 @@ function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issu
         console.log("CLEAN COMMENT TEXT: ", cleaned, ", comment Toxicity: ", cleanedToxicity);
 
         allUsers.set(user, comment.created_at);
+      }
 
-
+      if (isPull) {
+        console.log("ABOUT TO GET REVIEW COMMENTS FOR PULL");
+        const {data: comments} = yield client.pulls.listReviewComments({ 
+          owner: owner,
+          repo: repo,
+          pull_number: issueID,
+        });
+        console.log("RETURN:", comments);
       }
       return;
 
@@ -179,7 +195,6 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
         }
 
         for ( var issue of issues) {
-          console.log("Issue: ", issue);
           var issueUser = issue.user.login;
           var issueText = issue.title + " " + issue.body; 
           var issueId = issue.number;
@@ -188,14 +203,18 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
           var creationDate = new Date(creationTime); 
 
           allUsers.set(issueUser, creationTime);
-          allPosters.set(issueUser, creationDate);
+          var isPull = false; 
+          if ("pull_request" in issue) {
+            isPull = true; 
+            allPosters.set(issueUser, creationDate);
+          }
 
           // TODO: remove true
           if (true || creationDate.getMonth() == queryDate.getMonth()) {
             console.log("Creation of issue is previous month, so analyzing now. Issue #: ", issueId);
 
             // measure toxicity here 
-            yield getToxicityScoresForIssue(client, owner, repo, issueUser, issueId, issueText, issueUrl, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer, allUsers);
+            yield getToxicityScoresForIssue(client, owner, repo, isPull, issueUser, issueId, issueText, issueUrl, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer, allUsers);
           }
 
           // TODO: remove return 
@@ -217,8 +236,8 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
 function isFirstPost(client, owner, repo, allPosters, page = 1) {
   return __awaiter(this, void 0, void 0, function* () {
       // Provide console output if we loop for a while.
-      console.log('Checking issues page ', page);
-      const { status, data: issues } = yield client.issues.listForRepo({
+      console.log('Checking pulls page ', page);
+      const { status, data: pulls } = yield client.pulls.list({
         owner: owner,
         repo: repo,
         per_page: 100,
@@ -226,19 +245,18 @@ function isFirstPost(client, owner, repo, allPosters, page = 1) {
         state: 'all'
       });
     
-      console.log("num issues:", issues.length);
+      console.log("num pulls:", pulls.length);
       if (status !== 200) {
           throw new Error(`Received unexpected API status code ${status}`);
       }
-      if (issues.length === 0) {
-          console.log("Finished checking all issues, so will return the remaining new posters.")
+      if (pulls.length === 0) {
+          console.log("Finished checking all pulls, so will return the remaining new posters.")
           return allPosters;
       }
-      for (const issue of issues) {
-          console.log("is pull_request a key?", issue.pull_request != null, "pull_request" in issue, "ISSUE: ", issue)
-          const currUser = issue.user.login;
+      for (const pull of pulls) {
+          const currUser = pull.user.login;
           
-          var creationTime = issue.created_at;  
+          var creationTime = pull.created_at;  
           var creationDate = new Date(creationTime); 
 
           if (allPosters.has(currUser) && creationDate < allPosters.get(currUser)) {
