@@ -235,6 +235,7 @@ function isFirstPost(client, owner, repo, allPosters, page = 1) {
           return allPosters;
       }
       for (const issue of issues) {
+          console.log("is pull_request a key?", issue.pull_request != null, "pull_request" in issue, "ISSUE: ", issue)
           const currUser = issue.user.login;
           
           var creationTime = issue.created_at;  
@@ -322,7 +323,8 @@ function getUrls(toxicityMap, urls){
 }
 
 // TODO 
-// - documentation for both responsiveness & climate coach 
+// - documentation for both responsiveness & climate coach - give sendgrid instructions 
+// - test review comments & get PR stats 
 function generateEmailContents(repo, numOverThreshold, numSamples, toxicityScoresIssues, toxicityScoresComments, newPosters, allUsers) {
   return __awaiter(this, void 0, void 0, function* () {
 
