@@ -142,11 +142,10 @@ function getToxicityScoresForIssue(client, owner, repo, isPull, issueUser, issue
       }
 
       if (isPull) {
-        console.log("ABOUT TO GET REVIEW COMMENTS FOR PULL");
-        const {data: comments} = yield client.pulls.listReviewComments({ 
+        console.log("ABOUT TO GET REVIEW COMMENTS FOR PULL: ", issueID);
+        const {data: comments} = yield client.pulls.listReviewCommentsForRepo({ 
           owner: owner,
           repo: repo,
-          pull_number: issueID,
         });
         console.log("RETURN:", comments);
       }
