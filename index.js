@@ -140,15 +140,6 @@ function getToxicityScoresForIssue(client, owner, repo, isPull, issueUser, issue
 
         allUsers.set(user, comment.created_at);
       }
-
-      if (isPull) {
-        console.log("ABOUT TO GET REVIEW COMMENTS FOR PULL: ", issueID);
-        const {data: comments} = yield client.pulls.listReviewCommentsForRepo({ 
-          owner: owner,
-          repo: repo,
-        });
-        console.log("RETURN:", comments);
-      }
       return;
 
     } catch(err) {
@@ -173,7 +164,7 @@ function getBeginningOfPrevMonth(){
   return newDate;
 }
 
-function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresIssues, toxicityScoresComments, allUsers, allPosters) {
+function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresIssues, toxicityScoresComments, allUsers, allPullAuthors) {
   return __awaiter(this, void 0, void 0, function* () {
 
       try {
@@ -205,25 +196,23 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
           var isPull = false; 
           if ("pull_request" in issue) {
             isPull = true; 
-            allPosters.set(issueUser, creationDate);
+            allPullAuthors.set(issueUser, creationDate);
           }
 
-          // TODO: remove true
+          // TODO: remove true & check if earlier issues show up.
           if (true || creationDate.getMonth() == queryDate.getMonth()) {
-            console.log("Creation of issue is previous month, so analyzing now. Issue #: ", issueId);
+            console.log("CHECK-MONTH, Creation of issue is previous month, so analyzing now. Issue #: ", issueId, creationDate);
 
             // measure toxicity here 
             yield getToxicityScoresForIssue(client, owner, repo, isPull, issueUser, issueId, issueText, issueUrl, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer, allUsers);
           }
 
-          // TODO: remove return 
-          return; 
         }
 
         return; 
         
       } catch (err) {
-        console.log("error thrown: ", err); 
+        console.log("Error thrown: ", err); 
         return; 
       }
       
@@ -244,7 +233,6 @@ function isFirstPost(client, owner, repo, allPosters, page = 1) {
         state: 'all'
       });
     
-      console.log("num pulls:", pulls.length);
       if (status !== 200) {
           throw new Error(`Received unexpected API status code ${status}`);
       }
@@ -271,14 +259,6 @@ function isFirstPost(client, owner, repo, allPosters, page = 1) {
       return yield isFirstPost(client, owner, repo, allPosters, page + 1);
   });
 }
-
-
-// TODO - clean input 
-//   [x] remove code blocks '''
-//   [ ] should I remove blockquotes? typically refers to others' comments   
-
-// TODO - run it on moderation examples post input pruning 
-//     - try running sentence by sentence 
 
 function processRow(commentAnalyzer, data, row) {
   return __awaiter(this, void 0, void 0, function* () {
@@ -326,14 +306,9 @@ function processAllData(commentAnalyzer, pre_data) {
 
 
 function getUrls(toxicityMap, urls){
-  console.log("in getUrls. ", toxicityMap.size); 
   for (var user of toxicityMap.keys()){
-    console.log("user:", user, toxicityMap.get(user))
     for (var commentID of toxicityMap.get(user).keys()) {
-      console.log("comment:", commentID, toxicityMap.get(user).get(commentID))
       var url = toxicityMap.get(user).get(commentID)[2];
-      console.log("in comment:", url)
-
       urls.push(url); 
     }
   } 
@@ -395,34 +370,20 @@ function run() {
     var toxicityScoresComments = new Map(); 
 
     var allUsers = new Map();
-    var allPosters = new Map(); 
-    yield getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresIssues, toxicityScoresComments, allUsers, allPosters);
+    var allPullAuthors = new Map(); 
+    yield getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresIssues, toxicityScoresComments, allUsers, allPullAuthors);
 
-    console.log("ALL USERS:", allUsers);
-    console.log("# of USERS: ", allUsers.size); 
-
-    console.log("All POSTERS before: ", allPosters); 
-    var newPosters = allPosters; 
+    var newPosters = allPullAuthors; 
     yield isFirstPost(client, owner, repo, newPosters); 
-    console.log("All POSTERS after: ", allPosters, "NEW POSTERS after: ", newPosters); 
 
-    var sample = "Implemented build step functionality  Eiffel json schema's cloned from github eiffel repo, topic-drop4 branch. Eiffel Schema Changes  for jsonSchema2pojo generation plugin \n### Added required properties JavaType ExtendedJavaType    Modified eiffel shcema's \n1. Changed time format \n2. Removed 's' from class names ending with that letter";
-    console.log('cleaned sample: ', cleanText(sample));
-
-    console.log("value of map issues: ", toxicityScoresIssues);
-    console.log("value of map comments: ", toxicityScoresComments);
+    // console.log("value of map issues: ", toxicityScoresIssues);
+    // console.log("value of map comments: ", toxicityScoresComments);
 
     var numSamples =  numUnderThreshold + numOverThreshold; 
-    console.log("total number of text samples analyzed: ", numSamples); 
 
-    // does numSamples 
-    if (numSamples > 0) {
-      console.log("Proportion of comments exceeding toxicity threshold: ", numOverThreshold/numSamples); 
-    }
 
     // TODO
     // - filter github-actions[bot] out of user map  
-    // send email 
     const username = core.getInput("username", { required: true })
     const password = core.getInput("password", { required: true })
     const sendgrid_key = core.getInput("send-grid-key", { required: true })
@@ -450,8 +411,6 @@ function run() {
     //     console.error(error.response.body)
     //   }
     // });
-
-    console.log("After email sent.")
 
     // process csv data 
     pre_data = []
