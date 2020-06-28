@@ -106,21 +106,15 @@ function cleanText(text) {
   return plainText; 
 }
 
-// API location for listing and creating reactions.
-
-//octokit.pulls.listReviewComments({
-//  owner,
-//  repo,
-//  pull_number,
-// });
-
-function getToxicityScoresForIssue(client, owner, repo, isPull, issueUser, issueID, issueText, issueUrl, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer, allUsers) {
+function getToxicityScoresForIssue(client, owner, repo, issueUser, issueID, issueText, issueUrl, issueCreationDate, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer, allUsers) {
   return __awaiter(this, void 0, void 0, function* () {
+    var queryDate = getBeginningOfPrevMonth();
+    if (queryDate.getMonth() == issueCreationDate.getMonth()) {
+      // TODO - clean issue before getting toxicity 
+      var toxicity = yield analyzeToxicity(commentAnalyzer, issueText);
+      updateToxicityInMap(toxicity, issueUser, issueID, issueText, issueUrl, toxicityScoresIssues)
+    }
     
-    console.log("analyzing issue text... ");
-    var toxicity = yield analyzeToxicity(commentAnalyzer, issueText);
-    updateToxicityInMap(toxicity, issueUser, issueID, issueText, issueUrl, toxicityScoresIssues)
-
     console.log('getting comments...\n');
     try {
       const {data: comments} = yield client.issues.listComments({ 
@@ -129,16 +123,20 @@ function getToxicityScoresForIssue(client, owner, repo, isPull, issueUser, issue
           issue_number: issueID,
       });
     
+      // TODO - record cleaned toxicity instead 
       for (var comment of comments) {
-        var toxicity = yield analyzeToxicity(commentAnalyzer, comment.body);
-        var user = comment.user.login;
-        var cleaned = cleanText(comment.body);
-        updateToxicityInMap(toxicity, user, comment.id, comment.body, comment.html_url, toxicityScoresComments)
-        var cleanedToxicity = yield analyzeToxicity(commentAnalyzer, cleaned);
-        console.log("COMMENT TEXT: ", comment.body, " , user: ", user, ", comment Toxicity: ", toxicity);
-        console.log("CLEAN COMMENT TEXT: ", cleaned, ", comment Toxicity: ", cleanedToxicity);
+        var commentCreationDate = new Date(comment.created_at); 
+        if (queryDate.getMonth() == commentCreationDate.getMonth()) {
+          var toxicity = yield analyzeToxicity(commentAnalyzer, comment.body);
+          var user = comment.user.login;
+          var cleaned = cleanText(comment.body);
+          updateToxicityInMap(toxicity, user, comment.id, comment.body, comment.html_url, toxicityScoresComments)
+          var cleanedToxicity = yield analyzeToxicity(commentAnalyzer, cleaned);
 
-        allUsers.set(user, comment.created_at);
+          allUsers.set(user, comment.created_at);
+        } else {
+          console.log("Comment was not made in previous month, made on: ", commentCreationDate);
+        }
       }
       return;
 
@@ -160,7 +158,6 @@ function getBeginningOfPrevMonth(){
   }
   
   var newDate = new Date(prevYear, prevMonth, 1, 0, 0, 0, 0);
-  console.log("ISO DATE:", newDate.toISOString()); 
   return newDate;
 }
 
@@ -184,6 +181,7 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
             return; 
         }
 
+        var currDate = new Date();
         for ( var issue of issues) {
           var issueUser = issue.user.login;
           var issueText = issue.title + " " + issue.body; 
@@ -200,17 +198,15 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
           }
 
           // TODO: remove true & check if earlier issues show up.
-          if (true || creationDate.getMonth() == queryDate.getMonth()) {
-            console.log("CHECK-MONTH, Creation of issue is previous month, so analyzing now. Issue #: ", issueId, creationDate);
+          if (creationDate.getMonth() != currDate.getMonth()) {
+            console.log("CHECK-MONTH, Creation of issue is previous month or earlier, so analyzing now. Issue #: ", issueId, creationDate);
 
             // measure toxicity here 
-            yield getToxicityScoresForIssue(client, owner, repo, isPull, issueUser, issueId, issueText, issueUrl, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer, allUsers);
+            yield getToxicityScoresForIssue(client, owner, repo, issueUser, issueId, issueText, issueUrl, creationDate, toxicityScoresIssues, toxicityScoresComments, commentAnalyzer, allUsers);
           }
-
         }
 
         return; 
-        
       } catch (err) {
         console.log("Error thrown: ", err); 
         return; 
@@ -218,7 +214,6 @@ function getToxicityScores(client, owner, repo, commentAnalyzer, toxicityScoresI
       
   });
 }
-
 
 // No way to filter pulls by creator
 function isFirstPost(client, owner, repo, allPosters, page = 1) {
@@ -247,7 +242,6 @@ function isFirstPost(client, owner, repo, allPosters, page = 1) {
           var creationDate = new Date(creationTime); 
 
           if (allPosters.has(currUser) && creationDate < allPosters.get(currUser)) {
-              // delete currUser from the dict ; return if the dict is empty 
               console.log("An older post was found for user:  ", currUser);
               allPosters.delete(currUser);
               if (allPosters.size == 0) {
@@ -316,7 +310,6 @@ function getUrls(toxicityMap, urls){
 
 // TODO 
 // - documentation for both responsiveness & climate coach - give sendgrid instructions 
-// - test review comments & get PR stats 
 function generateEmailContents(repo, numOverThreshold, numSamples, toxicityScoresIssues, toxicityScoresComments, newPosters, allUsers) {
   return __awaiter(this, void 0, void 0, function* () {
 
@@ -376,8 +369,8 @@ function run() {
     var newPosters = allPullAuthors; 
     yield isFirstPost(client, owner, repo, newPosters); 
 
-    // console.log("value of map issues: ", toxicityScoresIssues);
-    // console.log("value of map comments: ", toxicityScoresComments);
+    console.log("value of map issues: ", toxicityScoresIssues);
+    console.log("value of map comments: ", toxicityScoresComments);
 
     var numSamples =  numUnderThreshold + numOverThreshold; 
 
